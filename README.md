@@ -6,6 +6,12 @@
 - A minimal MMIO-based onboard LED blink firmware
 - macOS automation scripts for setup, build, UF2 conversion, and flashing
 
+## CI Status
+
+|Action|Result|
+|------|------|
+|run.sh|[![Linux build (no flash)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml)|
+
 ## Look and feel
 
 The script shows a simple TUI with the most important steps printed.
