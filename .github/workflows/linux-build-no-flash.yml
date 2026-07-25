@@ -1,0 +1,68 @@
+name: Linux build (no flash)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-no-flash:
+    runs-on: ubuntu-latest
+    env:
+      PICO_SDK_PATH: ${{ github.workspace }}/.deps/pico-sdk
+      ELF2UF2_PATH: ${{ github.workspace }}/.tools/elf2uf2
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Swift 6
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            git \
+            gcc-arm-none-eabi \
+            libnewlib-arm-none-eabi \
+            pkg-config \
+            libusb-1.0-0-dev
+
+      - name: Fetch Pico SDK
+        run: |
+          mkdir -p .deps
+          if [ -d ".deps/pico-sdk/.git" ]; then
+            git -C .deps/pico-sdk fetch --quiet origin
+            git -C .deps/pico-sdk checkout --quiet master
+            git -C .deps/pico-sdk pull --ff-only --quiet origin master
+          else
+            git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git .deps/pico-sdk
+          fi
+          git -C .deps/pico-sdk submodule update --init --recursive --quiet
+
+      - name: Build picotool and create elf2uf2 wrapper
+        run: |
+          git clone --depth 1 https://github.com/raspberrypi/picotool.git /tmp/picotool
+          cmake -S /tmp/picotool -B /tmp/picotool/build -G Ninja
+          cmake --build /tmp/picotool/build --target picotool
+          mkdir -p .tools
+          cat > .tools/elf2uf2 <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ "$#" -ne 2 ]; then
+            printf "Usage: elf2uf2 <input.elf> <output.uf2>\n" >&2
+            exit 2
+          fi
+          exec /tmp/picotool/build/picotool uf2 convert "$1" "$2"
+          EOF
+          chmod +x .tools/elf2uf2
+
+      - name: Build firmware in no-flash mode
+        run: |
+          chmod +x Scripts/run.sh
+          Scripts/run.sh --no-flash
