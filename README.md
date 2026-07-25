@@ -6,6 +6,12 @@
 - A minimal MMIO-based onboard LED blink firmware
 - macOS automation scripts for setup, build, UF2 conversion, and flashing
 
+## Look and feel
+
+The script shows a simple TUI with the most important steps printed.
+
+![Terminal UI](__docs/terminal.png)
+
 ## Project structure
 
 ```text
