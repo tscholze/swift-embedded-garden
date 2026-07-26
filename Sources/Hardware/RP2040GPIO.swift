@@ -17,6 +17,7 @@ enum RP2040GPIO {
     private static let sioGPIOOutSetOffset: UInt32 = 0x14
     private static let sioGPIOOutClrOffset: UInt32 = 0x18
     private static let sioGPIOOESetOffset: UInt32 = 0x24
+    private static let sioGPIOOEClrOffset: UInt32 = 0x28
 
     // Function select value for SIO on RP2040.
     private static let funcSelSIO: UInt32 = 0x5
@@ -52,6 +53,27 @@ enum RP2040GPIO {
         // Route GPIO function mux to SIO and enable output.
         mmioWrite(ioGPIOCtrlAddress(pin: pin), funcSelSIO)
         mmioWrite(sioBase + sioGPIOOESetOffset, 1 << pin)
+    }
+
+    static func configureAsSIOInput(pin: UInt32) {
+        let resetMask = resetIOBank0Bit | resetPadsBank0Bit
+        mmioClearBits(resetsBase + resetsResetOffset, resetMask)
+
+        // Wait until reset-done shows both peripherals are released.
+        while (mmioRead(resetsBase + resetsResetDoneOffset) & resetMask) != resetMask {}
+
+        // Preserve current pad configuration (pull/drive) as a customization point.
+        let padAddress = padsGPIOAddress(pin: pin)
+        mmioWrite(padAddress, mmioRead(padAddress))
+
+        // Route GPIO function mux to SIO and disable output (make it an input).
+        mmioWrite(ioGPIOCtrlAddress(pin: pin), funcSelSIO)
+        mmioWrite(sioBase + sioGPIOOEClrOffset, 1 << pin)
+    }
+
+    // Typo-tolerant alias: some callers may request `configureAsSIInput`.
+    static func configureAsSIInput(pin: UInt32) {
+        configureAsSIOInput(pin: pin)
     }
 
     @inline(__always)
