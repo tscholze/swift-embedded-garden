@@ -11,6 +11,7 @@
 |Action|Result|
 |------|------|
 |run.sh|[![Linux build (no flash)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml)|
+|generator.sh|[![Validate standalone generator](https://github.com/tscholze/swift-embedded-garden/actions/workflows/validate-generator.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/validate-generator.yml)|
 
 ## One-file project generator
 
@@ -169,3 +170,9 @@ When adding new Swift files, include them in `CMakeLists.txt` under `SWIFT_SOURC
 
 - **Build-only validation without hardware connected**  
   Use `Scripts/run.sh --no-flash`.
+
+## Thanks to
+
+- The 'Embedded' channel on the [Swift Discord](https://discord.gg/3v9kNvSBd)
+- The 'Embedded' section on the [Swift Forum](https://forums.swift.org/c/platform/embedded/107)
+- More or less good working GitHub Copilot
