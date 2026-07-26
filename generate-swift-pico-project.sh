@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# Tobias Scholze, 2026, MIT License
+#
 # Standalone project generator for Swift Embedded + Raspberry Pi Pico.
 # This script is self-contained: you can copy only this file anywhere, run it,
 # and it will create a complete ready-to-use project scaffold.
