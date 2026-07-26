@@ -1,3 +1,5 @@
+![Cover](__docs/some.png)
+
 # Swift Embedded Garden for Raspberry Pi Pico (RP2040)
 > This repository is a complete Swift 6 Embedded starter for the Raspberry Pi Pico, including:
 
@@ -5,6 +7,8 @@
 - Pico C-SDK integration through CMake
 - A minimal MMIO-based onboard LED blink firmware
 - macOS automation scripts for setup, build, UF2 conversion, and flashing
+
+If you are looking for the single-file-based generator to setup your own Swift embedded project for the Raspberry Pi Pico (2024), than you might be interested in my other repository [swift-embedded-garden-generator](https://github.com/tscholze/swift-embedded-garden-generator).
 
 ## CI Status
 
@@ -176,3 +180,9 @@ When adding new Swift files, include them in `CMakeLists.txt` under `SWIFT_SOURC
 - The 'Embedded' channel on the [Swift Discord](https://discord.gg/3v9kNvSBd)
 - The 'Embedded' section on the [Swift Forum](https://forums.swift.org/c/platform/embedded/107)
 - More or less good working GitHub Copilot
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Dependencies or assets maybe licensed differently.
