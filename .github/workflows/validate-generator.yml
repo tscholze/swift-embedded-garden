@@ -1,0 +1,89 @@
+name: Validate standalone generator
+
+on:
+  push:
+    paths:
+      - generate-swift-pico-project.sh
+  pull_request:
+    paths:
+      - generate-swift-pico-project.sh
+
+jobs:
+  validate-generator:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Swift 6
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            git \
+            gcc-arm-none-eabi \
+            libnewlib-arm-none-eabi \
+            pkg-config \
+            libusb-1.0-0-dev
+
+      - name: Prepare Pico SDK and elf2uf2 wrapper
+        run: |
+          mkdir -p .deps
+          git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git .deps/pico-sdk
+          git -C .deps/pico-sdk submodule update --init --recursive --quiet
+
+          git clone --depth 1 https://github.com/raspberrypi/picotool.git /tmp/picotool
+          cmake -S /tmp/picotool -B /tmp/picotool/build -G Ninja
+          cmake --build /tmp/picotool/build --target picotool
+
+          mkdir -p .tools
+          cat > .tools/elf2uf2 <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ "$#" -ne 2 ]; then
+            printf "Usage: elf2uf2 <input.elf> <output.uf2>\n" >&2
+            exit 2
+          fi
+          exec /tmp/picotool/build/picotool uf2 convert "$1" "$2"
+          EOF
+          chmod +x .tools/elf2uf2
+
+      - name: Validate generator script and generated project
+        run: |
+          chmod +x ./generate-swift-pico-project.sh
+          bash -n ./generate-swift-pico-project.sh
+          ./generate-swift-pico-project.sh --help >/dev/null
+
+          TEST_ROOT="$(mktemp -d /tmp/pico-generator-test-XXXXXX)"
+          OUT_DIR="${TEST_ROOT}/GeneratedPico"
+
+          ./generate-swift-pico-project.sh \
+            --non-interactive \
+            --project-name GeneratedPico \
+            --output-dir "${OUT_DIR}" \
+            --target-name generated-pico-blink \
+            --post-action none \
+            --include-ci
+
+          test -f "${OUT_DIR}/Scripts/init.sh"
+          test -f "${OUT_DIR}/Scripts/run.sh"
+          test -f "${OUT_DIR}/CMakeLists.txt"
+          test -f "${OUT_DIR}/README.md"
+          test -f "${OUT_DIR}/.github/workflows/linux-build-no-flash.yml"
+
+          chmod +x "${OUT_DIR}/Scripts/init.sh" "${OUT_DIR}/Scripts/run.sh"
+          (
+            cd "${OUT_DIR}"
+            PICO_SDK_PATH="${GITHUB_WORKSPACE}/.deps/pico-sdk" \
+            ELF2UF2_PATH="${GITHUB_WORKSPACE}/.tools/elf2uf2" \
+            Scripts/run.sh --no-flash
+          )
+
+          rm -rf "${TEST_ROOT}"

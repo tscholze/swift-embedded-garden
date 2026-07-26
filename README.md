@@ -12,6 +12,33 @@
 |------|------|
 |run.sh|[![Linux build (no flash)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml)|
 
+## One-file project generator
+
+If you want to create a fresh standalone project from a single file, use:
+
+```bash
+./generate-swift-pico-project.sh
+```
+
+It supports interactive prompts plus optional flags for automation:
+
+```bash
+./generate-swift-pico-project.sh \
+  --project-name MyPicoBlink \
+  --output-dir ./MyPicoBlink \
+  --target-name my-pico-blink \
+  --pico-sdk-ref master \
+  --swiftly-channel main-snapshot \
+  --no-include-ci \
+  --post-action none
+```
+
+Helpful options:
+
+- `--non-interactive` for CI/scripting
+- `--force` to allow non-empty output directories
+- `--post-action init|build|none|ask` to control auto-run behavior after generation
+
 ## Look and feel
 
 The script shows a simple TUI with the most important steps printed.
