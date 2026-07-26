@@ -11,6 +11,9 @@ on:
 jobs:
   validate-generator:
     runs-on: ubuntu-latest
+    env:
+      PICO_SDK_PATH: ${{ github.workspace }}/.deps/pico-sdk
+      ELF2UF2_PATH: ${{ github.workspace }}/.tools/elf2uf2
 
     steps:
       - name: Checkout repository
@@ -36,15 +39,15 @@ jobs:
       - name: Prepare Pico SDK and elf2uf2 wrapper
         run: |
           mkdir -p .deps
-          git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git .deps/pico-sdk
-          git -C .deps/pico-sdk submodule update --init --recursive --quiet
+          git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git "${PICO_SDK_PATH}"
+          git -C "${PICO_SDK_PATH}" submodule update --init --recursive --quiet
 
           git clone --depth 1 https://github.com/raspberrypi/picotool.git /tmp/picotool
           cmake -S /tmp/picotool -B /tmp/picotool/build -G Ninja
           cmake --build /tmp/picotool/build --target picotool
 
           mkdir -p .tools
-          cat > .tools/elf2uf2 <<'EOF'
+          cat > "${ELF2UF2_PATH}" <<'EOF'
           #!/usr/bin/env bash
           set -euo pipefail
           if [ "$#" -ne 2 ]; then
@@ -53,7 +56,7 @@ jobs:
           fi
           exec /tmp/picotool/build/picotool uf2 convert "$1" "$2"
           EOF
-          chmod +x .tools/elf2uf2
+          chmod +x "${ELF2UF2_PATH}"
 
       - name: Validate generator script and generated project
         run: |
@@ -81,8 +84,6 @@ jobs:
           chmod +x "${OUT_DIR}/Scripts/init.sh" "${OUT_DIR}/Scripts/run.sh"
           (
             cd "${OUT_DIR}"
-            PICO_SDK_PATH="${GITHUB_WORKSPACE}/.deps/pico-sdk" \
-            ELF2UF2_PATH="${GITHUB_WORKSPACE}/.tools/elf2uf2" \
             Scripts/run.sh --no-flash
           )
 
