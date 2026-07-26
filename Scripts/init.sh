@@ -12,10 +12,14 @@ PICO_SDK_PATH="${PICO_SDK_PATH:-$PICO_SDK_PATH_DEFAULT}"
 PICO_SDK_REF="${PICO_SDK_REF:-master}"
 SWIFTLY_CHANNEL="${SWIFTLY_CHANNEL:-main-snapshot}"
 
+# Prints a standard progress message.
 log() { printf "==> %s\n" "$*"; }
+# Prints a warning message.
 warn() { printf "⚠️  %s\n" "$*"; }
+# Prints an error message and exits with failure.
 fail() { printf "❌ %s\n" "$*"; exit 1; }
 
+# Shows command-line usage and available options.
 print_usage() {
   cat <<'EOF'
 Usage: Scripts/init.sh [--sdk-ref <ref>] [--help]
@@ -26,6 +30,7 @@ Options:
 EOF
 }
 
+# Parses supported flags and updates configuration variables.
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -46,12 +51,14 @@ parse_args() {
   done
 }
 
+# Ensures Homebrew is installed because the script depends on it.
 ensure_brew() {
   if ! command -v brew >/dev/null 2>&1; then
     fail "Homebrew is required. Install from https://brew.sh and re-run."
   fi
 }
 
+# Installs a Homebrew package only when it is not already installed.
 ensure_brew_pkg() {
   local pkg="$1"
   if brew list --versions "$pkg" >/dev/null 2>&1; then
@@ -62,6 +69,7 @@ ensure_brew_pkg() {
   fi
 }
 
+# Ensures ARM cross-compiler tools for RP2040 are available.
 ensure_arm_toolchain() {
   if command -v arm-none-eabi-gcc >/dev/null 2>&1; then
     log "ARM GNU toolchain already present: $(command -v arm-none-eabi-gcc)"
@@ -70,6 +78,7 @@ ensure_arm_toolchain() {
   ensure_brew_pkg arm-none-eabi-gcc
 }
 
+# Ensures a Swift 6 compiler is available, provisioning via swiftly if needed.
 ensure_swift_toolchain() {
   if command -v swiftc >/dev/null 2>&1; then
     if swiftc --version | grep -q "Swift version 6"; then
@@ -109,6 +118,7 @@ ensure_swift_toolchain() {
   log "Active Swift toolchain: $(swiftc --version | head -n1)"
 }
 
+# Clones or updates pico-sdk to the configured path and ref.
 ensure_pico_sdk() {
   mkdir -p "$(dirname "${PICO_SDK_PATH}")"
   if [ -d "${PICO_SDK_PATH}/.git" ]; then
@@ -124,6 +134,7 @@ ensure_pico_sdk() {
   fi
 }
 
+# Creates an elf2uf2-compatible wrapper command backed by picotool.
 ensure_elf2uf2() {
   mkdir -p "${TOOLS_DIR}"
   local output="${TOOLS_DIR}/elf2uf2"
@@ -144,6 +155,7 @@ EOF
   chmod +x "${output}"
 }
 
+# Writes Scripts/env.sh so build scripts can load generated paths.
 write_env_file() {
   cat > "${PROJECT_ROOT}/Scripts/env.sh" <<EOF
 #!/usr/bin/env bash
@@ -156,6 +168,7 @@ EOF
   chmod +x "${PROJECT_ROOT}/Scripts/env.sh"
 }
 
+# Runs the complete initialization workflow in the required order.
 main() {
   parse_args "$@"
   ensure_brew
