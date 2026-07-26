@@ -3,6 +3,17 @@
 
 @_cdecl("swift_main")
 public func swift_main() -> Never {
+
+    // 1. Blink onboard LED (GPIO 25) at 2Hz.
+    // blink()
+
+    // 2. Traffic light sequence on GPIOs 12, 14, 15.
+    traffic_light()
+}
+
+// MARK: - Samples -
+
+private func blink() -> Never {
     let ledPin = PicoBoard.onboardLEDPin
     RP2040GPIO.configureAsSIOOutput(pin: ledPin)
 
@@ -11,6 +22,36 @@ public func swift_main() -> Never {
         pico_delay_ms(250)
         RP2040GPIO.setLow(pin: ledPin)
         pico_delay_ms(250)
+    }
+}
+
+private func traffic_light() -> Never {
+    let redPin = UInt32(15)
+    let yellowPin = UInt32(14)
+    let greenPin = UInt32(12)
+
+    RP2040GPIO.configureAsSIOOutput(pin: redPin)
+    RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
+    RP2040GPIO.configureAsSIOOutput(pin: greenPin)
+
+    while true {
+        // Red on, others off
+        RP2040GPIO.setHigh(pin: redPin)
+        RP2040GPIO.setLow(pin: yellowPin)
+        RP2040GPIO.setLow(pin: greenPin)
+        pico_delay_ms(5000)
+
+        // Yellow on, others off
+        RP2040GPIO.setLow(pin: redPin)
+        RP2040GPIO.setHigh(pin: yellowPin)
+        RP2040GPIO.setLow(pin: greenPin)
+        pico_delay_ms(2000)
+
+        // Green on, others off
+        RP2040GPIO.setLow(pin: redPin)
+        RP2040GPIO.setLow(pin: yellowPin)
+        RP2040GPIO.setHigh(pin: greenPin)
+        pico_delay_ms(5000)
     }
 }
 
