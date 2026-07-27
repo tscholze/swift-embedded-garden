@@ -86,6 +86,15 @@ enum RP2040GPIO {
         ioBank0Base + 0x004 + (pin * 8)
     }
 
+    /// Set the function (mux) for a GPIO pin.
+    ///
+    /// - Parameters:
+    ///   - pin: GPIO pin number
+    ///   - funcSel: Function select value from the datasheet (e.g., 0=SIO, 2=PWM)
+    static func setFunction(pin: UInt32, funcSel: UInt32) {
+        mmioWrite(ioGPIOCtrlAddress(pin: pin), funcSel)
+    }
+
     /// Compute the address of the pad control register for `pin`.
     /// Pad registers control pull-ups/pull-downs and drive strength.
     ///
@@ -220,6 +229,116 @@ enum RP2040GPIO {
     static func read(pin: UInt32) -> Bool {
         let v = mmioRead(sioBase + sioGPIOInOffset)
         return (v & (1 << pin)) != 0
+    }
+
+    /// Atomically toggle the output state of a GPIO pin.
+    ///
+    /// - Parameter pin: GPIO pin number to toggle.
+    ///
+    /// This reads the SIO OUT register and flips the bit for `pin`.
+    static func toggle(pin: UInt32) {
+        let out = mmioRead(sioBase + sioGPIOOutOffset)
+        if (out & (1 << pin)) != 0 {
+            mmioClearBits(sioBase + sioGPIOOutOffset, 1 << pin)
+        } else {
+            mmioSetBits(sioBase + sioGPIOOutOffset, 1 << pin)
+        }
+    }
+
+    /// Wait until the pin reads high (logic 1) or optional timeout elapses.
+    ///
+    /// - Parameters:
+    ///   - pin: GPIO pin number to watch.
+    ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+    /// - Returns: `true` if the pin reached high, `false` if timed out.
+    static func waitForHigh(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+        if let t = timeoutMs {
+            var remaining = t
+            while remaining > 0 {
+                if read(pin: pin) { return true }
+                pico_delay_ms(1)
+                remaining -= 1
+            }
+            return false
+        } else {
+            while !read(pin: pin) {}
+            return true
+        }
+    }
+
+    /// Wait until the pin reads low (logic 0) or optional timeout elapses.
+    ///
+    /// - Parameters:
+    ///   - pin: GPIO pin number to watch.
+    ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+    /// - Returns: `true` if the pin reached low, `false` if timed out.
+    static func waitForLow(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+        if let t = timeoutMs {
+            var remaining = t
+            while remaining > 0 {
+                if !read(pin: pin) { return true }
+                pico_delay_ms(1)
+                remaining -= 1
+            }
+            return false
+        } else {
+            while read(pin: pin) {}
+            return true
+        }
+    }
+
+    /// Wait for a rising edge (low -> high) on `pin`.
+    ///
+    /// - Parameters:
+    ///   - pin: GPIO pin number to watch.
+    ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+    /// - Returns: `true` if a rising edge occurred, `false` if timed out.
+    static func waitForRisingEdge(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+        var last = read(pin: pin)
+        if let t = timeoutMs {
+            var remaining = t
+            while remaining > 0 {
+                let cur = read(pin: pin)
+                if !last && cur { return true }
+                last = cur
+                pico_delay_ms(1)
+                remaining -= 1
+            }
+            return false
+        } else {
+            while true {
+                let cur = read(pin: pin)
+                if !last && cur { return true }
+                last = cur
+            }
+        }
+    }
+
+    /// Wait for a falling edge (high -> low) on `pin`.
+    ///
+    /// - Parameters:
+    ///   - pin: GPIO pin number to watch.
+    ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+    /// - Returns: `true` if a falling edge occurred, `false` if timed out.
+    static func waitForFallingEdge(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+        var last = read(pin: pin)
+        if let t = timeoutMs {
+            var remaining = t
+            while remaining > 0 {
+                let cur = read(pin: pin)
+                if last && !cur { return true }
+                last = cur
+                pico_delay_ms(1)
+                remaining -= 1
+            }
+            return false
+        } else {
+            while true {
+                let cur = read(pin: pin)
+                if last && !cur { return true }
+                last = cur
+            }
+        }
     }
 
     /// Set the output level for `pin` to logical low (0).

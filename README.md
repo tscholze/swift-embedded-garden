@@ -172,6 +172,25 @@ RP2040GPIO.enablePadPullUp(pin: 15)
 
 // Later, disable internal pulls for pin 15
 RP2040GPIO.disablePadPulls(pin: 15)
+
+## Example: PWM demo
+
+The repository includes a small PWM demo that ramps the onboard LED brightness
+using `RP2040PWM`. To build and flash the demo to a Pico:
+
+1. Ensure `PICO_SDK_PATH` is set (run `Scripts/init.sh` once).
+
+2. Build and flash as usual:
+
+```bash
+Scripts/run.sh
+```
+
+The demo is wired to run from the firmware entrypoint (`Main.swift`). It
+attempts to configure PWM on the onboard LED at 1 kHz and ramps duty from
+0–100% and back. If PWM setup fails (e.g. unusual system clock), it falls
+back to a simple blink so you still get visible feedback.
+
 ```
 
 ## Dependency extension with Package.swift
