@@ -154,6 +154,26 @@ Recommended layering:
 
 When adding new Swift files, include them in `CMakeLists.txt` under `SWIFT_SOURCES`.
 
+## Example: GPIO usage
+
+A tiny example showing how to configure a GPIO pin for CPU-controlled output,
+toggle it, and how to enable/disable internal pull resistors for an input pin.
+
+```swift
+// Configure pin 25 as a CPU-driven output and set it high/low
+RP2040GPIO.configureAsSIOOutput(pin: 25)
+RP2040GPIO.setHigh(pin: 25)
+// ...delay...
+RP2040GPIO.setLow(pin: 25)
+
+// Configure pin 15 as an input and enable the internal pull-up resistor
+RP2040GPIO.configureAsSIOInput(pin: 15)
+RP2040GPIO.enablePadPullUp(pin: 15)
+
+// Later, disable internal pulls for pin 15
+RP2040GPIO.disablePadPulls(pin: 15)
+```
+
 ## Dependency extension with Package.swift
 
 `Package.swift` is preconfigured so you can add additional Swift Embedded dependencies later by uncommenting and adjusting the example dependency blocks.

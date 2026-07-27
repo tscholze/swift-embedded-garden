@@ -43,6 +43,9 @@ enum RP2040GPIO {
     /// SIO GPIO OUT offset.
     /// The full output register; used for atomic set/clear operations.
     private static let sioGPIOOutOffset: UInt32 = 0x10
+    /// SIO GPIO IN offset.
+    /// Reading this register gives the current sampled input levels for all GPIOs.
+    private static let sioGPIOInOffset: UInt32 = 0x04
 
     /// SIO GPIO OE_SET offset.
     /// Writing a 1 here enables output (makes pin driveable by CPU).
@@ -63,6 +66,12 @@ enum RP2040GPIO {
     /// Reset bit mask for PADS_BANK0.
     /// Used when requesting or checking reset state for PADS_BANK0.
     private static let resetPadsBank0Bit: UInt32 = 1 << 8
+
+    /// Pad register bit for enabling the internal pull-up resistor (PUE).
+    private static let padPUEBit: UInt32 = 1 << 3
+
+    /// Pad register bit for enabling the internal pull-down resistor (PDE).
+    private static let padPDEBit: UInt32 = 1 << 2
 
     // MARK: - Private helpers -
 
@@ -136,6 +145,57 @@ enum RP2040GPIO {
         mmioWrite(sioBase + sioGPIOOEClrOffset, 1 << pin)
     }
 
+    /// Enable the internal pull-up resistor on a pin's pad.
+    ///
+    /// - Parameter pin: GPIO pin number to enable pull-up for.
+    ///
+    /// This sets the PUE bit and clears PDE in the pad control register.
+    /// The function also ensures the PAD and IO blocks are out of reset.
+    static func enablePadPullUp(pin: UInt32) {
+        let resetMask = resetIOBank0Bit | resetPadsBank0Bit
+        mmioClearBits(resetsBase + resetsResetOffset, resetMask)
+        while (mmioRead(resetsBase + resetsResetDoneOffset) & resetMask) != resetMask {}
+
+        let padAddress = padsGPIOAddress(pin: pin)
+        var val = mmioRead(padAddress)
+        val |= padPUEBit
+        val &= ~padPDEBit
+        mmioWrite(padAddress, val)
+    }
+
+    /// Enable the internal pull-down resistor on a pin's pad.
+    ///
+    /// - Parameter pin: GPIO pin number to enable pull-down for.
+    ///
+    /// This sets the PDE bit and clears PUE in the pad control register.
+    /// The function also ensures the PAD and IO blocks are out of reset.
+    static func enablePadPullDown(pin: UInt32) {
+        let resetMask = resetIOBank0Bit | resetPadsBank0Bit
+        mmioClearBits(resetsBase + resetsResetOffset, resetMask)
+        while (mmioRead(resetsBase + resetsResetDoneOffset) & resetMask) != resetMask {}
+
+        let padAddress = padsGPIOAddress(pin: pin)
+        var val = mmioRead(padAddress)
+        val |= padPDEBit
+        val &= ~padPUEBit
+        mmioWrite(padAddress, val)
+    }
+
+    /// Disable internal pull resistors on a pin's pad (neither pull-up nor pull-down).
+    ///
+    /// - Parameter pin: GPIO pin number to clear pull configuration for.
+    static func disablePadPulls(pin: UInt32) {
+        let resetMask = resetIOBank0Bit | resetPadsBank0Bit
+        mmioClearBits(resetsBase + resetsResetOffset, resetMask)
+        while (mmioRead(resetsBase + resetsResetDoneOffset) & resetMask) != resetMask {}
+
+        let padAddress = padsGPIOAddress(pin: pin)
+        var val = mmioRead(padAddress)
+        val &= ~padPUEBit
+        val &= ~padPDEBit
+        mmioWrite(padAddress, val)
+    }
+
     /// Typo-tolerant alias for `configureAsSIOInput`.
     ///
     /// - Parameter pin: GPIO pin number to configure.
@@ -150,6 +210,16 @@ enum RP2040GPIO {
     @inline(__always)
     static func setHigh(pin: UInt32) {
         mmioSetBits(sioBase + sioGPIOOutOffset, 1 << pin)
+    }
+
+    /// Read the current logical level of a GPIO pin.
+    ///
+    /// - Parameter pin: GPIO pin number to read.
+    /// - Returns: `true` if the pin reads as logic high, otherwise `false`.
+    @inline(__always)
+    static func read(pin: UInt32) -> Bool {
+        let v = mmioRead(sioBase + sioGPIOInOffset)
+        return (v & (1 << pin)) != 0
     }
 
     /// Set the output level for `pin` to logical low (0).

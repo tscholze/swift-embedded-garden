@@ -7,8 +7,8 @@ public func swift_main() -> Never {
     // 1. Blink onboard LED (GPIO 25) at 2Hz.
     // blink()
 
-    // 2. Traffic light sequence on GPIOs 12, 14, 15.
-    TrafficLight().run()
+    // 2. Run the GPIO example: blink LED and demonstrate pull-up input.
+    GPIOExample().run()
 }
 
 // MARK: - Samples -
