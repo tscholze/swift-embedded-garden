@@ -26,9 +26,9 @@ private func blink() -> Never {
 }
 
 private func traffic_light() -> Never {
-    let redPin = UInt32(15)
-    let yellowPin = UInt32(14)
-    let greenPin = UInt32(12)
+    let redPin = UInt32(2)
+    let yellowPin = UInt32(3)
+    let greenPin = UInt32(4)
 
     RP2040GPIO.configureAsSIOOutput(pin: redPin)
     RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
@@ -39,19 +39,19 @@ private func traffic_light() -> Never {
         RP2040GPIO.setHigh(pin: redPin)
         RP2040GPIO.setLow(pin: yellowPin)
         RP2040GPIO.setLow(pin: greenPin)
-        pico_delay_ms(5000)
+        pico_delay_ms(1000)
 
         // Yellow on, others off
         RP2040GPIO.setLow(pin: redPin)
         RP2040GPIO.setHigh(pin: yellowPin)
         RP2040GPIO.setLow(pin: greenPin)
-        pico_delay_ms(2000)
+        pico_delay_ms(1000)
 
         // Green on, others off
         RP2040GPIO.setLow(pin: redPin)
         RP2040GPIO.setLow(pin: yellowPin)
         RP2040GPIO.setHigh(pin: greenPin)
-        pico_delay_ms(5000)
+        pico_delay_ms(1000)
     }
 }
 

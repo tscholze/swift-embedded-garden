@@ -16,6 +16,7 @@ enum RP2040GPIO {
     // SIO GPIO offsets.
     private static let sioGPIOOutSetOffset: UInt32 = 0x14
     private static let sioGPIOOutClrOffset: UInt32 = 0x18
+    private static let sioGPIOOutOffset: UInt32 = 0x10
     private static let sioGPIOOESetOffset: UInt32 = 0x24
     private static let sioGPIOOEClrOffset: UInt32 = 0x28
 
@@ -78,11 +79,11 @@ enum RP2040GPIO {
 
     @inline(__always)
     static func setHigh(pin: UInt32) {
-        mmioWrite(sioBase + sioGPIOOutSetOffset, 1 << pin)
+        mmioSetBits(sioBase + sioGPIOOutOffset, 1 << pin)
     }
 
     @inline(__always)
     static func setLow(pin: UInt32) {
-        mmioWrite(sioBase + sioGPIOOutClrOffset, 1 << pin)
+        mmioClearBits(sioBase + sioGPIOOutOffset, 1 << pin)
     }
 }
