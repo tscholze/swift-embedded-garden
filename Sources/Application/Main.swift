@@ -8,7 +8,7 @@ public func swift_main() -> Never {
     // blink()
 
     // 2. Traffic light sequence on GPIOs 12, 14, 15.
-    traffic_light()
+    TrafficLight().run()
 }
 
 // MARK: - Samples -
@@ -25,35 +25,5 @@ private func blink() -> Never {
     }
 }
 
-private func traffic_light() -> Never {
-    let redPin = UInt32(2)
-    let yellowPin = UInt32(3)
-    let greenPin = UInt32(4)
-
-    RP2040GPIO.configureAsSIOOutput(pin: redPin)
-    RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
-    RP2040GPIO.configureAsSIOOutput(pin: greenPin)
-
-    while true {
-        // Red on, others off
-        RP2040GPIO.setHigh(pin: redPin)
-        RP2040GPIO.setLow(pin: yellowPin)
-        RP2040GPIO.setLow(pin: greenPin)
-        pico_delay_ms(1000)
-
-        // Yellow on, others off
-        RP2040GPIO.setLow(pin: redPin)
-        RP2040GPIO.setHigh(pin: yellowPin)
-        RP2040GPIO.setLow(pin: greenPin)
-        pico_delay_ms(1000)
-
-        // Green on, others off
-        RP2040GPIO.setLow(pin: redPin)
-        RP2040GPIO.setLow(pin: yellowPin)
-        RP2040GPIO.setHigh(pin: greenPin)
-        pico_delay_ms(1000)
-    }
-}
-
 @_silgen_name("pico_delay_ms")
-private func pico_delay_ms(_ ms: UInt32)
+func pico_delay_ms(_ ms: UInt32)

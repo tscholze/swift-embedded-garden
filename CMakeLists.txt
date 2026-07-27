@@ -28,6 +28,7 @@ pico_sdk_init()
 # Compile all Swift code into one embedded object.
 set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLight.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/BoardSupport/PicoBoard.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040GPIO.swift"
