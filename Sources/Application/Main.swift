@@ -2,18 +2,18 @@
 // This blink loop demonstrates the layered project shape and MMIO GPIO control.
 
 @_cdecl("swift_main")
-public func main() -> Never {
-    // 1. Blink the Raspberry Pi Pico onboard LED
-    // blinkOnboardLed()
+public func swift_main() -> Never {
 
-    // 2. Blink a traffic light sequence
-    blinkTrafficLight()
+    // 1. Blink onboard LED (GPIO 25) at 2Hz.
+    // blink()
+
+    // Traffic light samples
+    TrafficLight().run()
 }
 
 // MARK: - Samples -
 
-/// Blink the Raspberry Pi Pico onboard LED (GPIO25) in a loop.
-private func blinkOnboardLed() -> Never {
+private func blink() -> Never {
     let ledPin = PicoBoard.onboardLEDPin
     RP2040GPIO.configureAsSIOOutput(pin: ledPin)
 
@@ -58,4 +58,4 @@ private func blinkTrafficLight() -> Never {
 }
 
 @_silgen_name("pico_delay_ms")
-private func pico_delay_ms(_ ms: UInt32)
+func pico_delay_ms(_ ms: UInt32)
