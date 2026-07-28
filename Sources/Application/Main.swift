@@ -1,5 +1,7 @@
-// Minimal Swift Embedded firmware entry point.
-// This blink loop demonstrates the layered project shape and MMIO GPIO control.
+/// Firmware entry point selected by the C bootstrap.
+///
+/// Switch the invoked sample to select a different firmware demonstration.
+/// The current default is the hardware-validated SSD1306 I2C display sample.
 
 @_cdecl("swift_main")
 public func swift_main() -> Never {
@@ -7,12 +9,12 @@ public func swift_main() -> Never {
     // 1. Blink onboard LED (GPIO 25) at 2Hz.
     // blink()
 
-    // Traffic light samples
-    TrafficLight().run()
+    DisplaySample().run()
 }
 
 // MARK: - Samples -
 
+/// Blinks the RP2040 Pico onboard LED forever for a minimal GPIO smoke test.
 private func blink() -> Never {
     let ledPin: UInt32 = 25
     RP2040GPIO.configureAsSIOOutput(pin: ledPin)
@@ -25,8 +27,7 @@ private func blink() -> Never {
     }
 }
 
-/// Blink a traffic light sequence using GPIO15 (red), 
-/// GPIO14 (yellow), and GPIO12 (green).
+/// Blinks a traffic-light sequence using GPIO15, GPIO14, and GPIO12.
 private func blinkTrafficLight() -> Never {
     let redPin = UInt32(15)
     let yellowPin = UInt32(14)
@@ -57,5 +58,6 @@ private func blinkTrafficLight() -> Never {
     }
 }
 
+/// Imports the Pico SDK-backed millisecond delay from the C bootstrap.
 @_silgen_name("pico_delay_ms")
 func pico_delay_ms(_ ms: UInt32)

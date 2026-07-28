@@ -25,14 +25,23 @@ include("${CMAKE_CURRENT_LIST_DIR}/CMake/SwiftEmbedded.cmake")
 
 pico_sdk_init()
 
-# Compile all Swift code into one embedded object.
+# Compile all Swift code into one embedded object. Sources are explicitly listed
+# because CMake/SwiftEmbedded.cmake invokes swiftc directly rather than SwiftPM.
 set(SWIFT_SOURCES
+  # Firmware entry point and selectable demonstrations.
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLight.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOExample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMDemo.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
+  # Board-specific display wiring, generic display API, and pure graphics.
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/BoardSupport/PicoSSD1306.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Display/SSD1306Driver.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Graphics/SwiftGFX.swift"
+  # Reusable MMIO and RP2040 peripheral drivers.
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040GPIO.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040I2C.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040PWM.swift"
 )
 
