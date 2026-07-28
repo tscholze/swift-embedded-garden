@@ -17,6 +17,16 @@ If you are looking for the single-file-based generator to setup your own Swift e
 |run.sh|[![Linux build (no flash)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/linux-build-no-flash.yml)|
 |generator.sh|[![Validate standalone generator](https://github.com/tscholze/swift-embedded-garden/actions/workflows/validate-generator.yml/badge.svg)](https://github.com/tscholze/swift-embedded-garden/actions/workflows/validate-generator.yml)|
 
+## Samples
+
+The repository currently includes a few small beginner-friendly samples under the application layer:
+
+- `GPIOExample` — configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors.
+- `PWMDemo` — configures PWM on the onboard LED and ramps the brightness up and down.
+- `TrafficLight` — demonstrates a simple traffic-light style output sequence and can also use a KY-040 rotary encoder to switch between red, yellow, and green states.
+
+You can switch which sample runs by updating the entry point in `Sources/Application/Main.swift`.
+
 ## One-file project generator
 
 If you want to create a fresh standalone project from a single file, use:

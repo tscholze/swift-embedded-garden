@@ -1,5 +1,4 @@
 // Simple runtime example demonstrating GPIO output, input, and pad pulls.
-
 struct GPIOExample {
     // Use the on-board LED and a sample input pin.
     private let ledPin: UInt32 = 25
