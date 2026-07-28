@@ -1,14 +1,17 @@
+/// A simple traffic light simulation using three GPIO pins for red, yellow, and green lights.
+/// Source is based on different input mechanisms, such as a rotary encoder or a simple timed sequence.
 struct TrafficLight {
     // MARK: - GPIO Pin Assignments -
 
-    private let ledPin = PicoBoard.onboardLEDPin
-    private let redPin = UInt32(2)
-    private let yellowPin = UInt32(3)
-    private let greenPin = UInt32(4)
+    private let ledPin: UInt32 = 25
+    private let redPin: UInt32 = 2
+    private let yellowPin: UInt32 = 3
+    private let greenPin: UInt32 = 4
 
     // MARK: - Sample -
 
     func run() -> Never {
+        // Apply configurations for reused pins.
         RP2040GPIO.configureAsSIOOutput(pin: ledPin)
         RP2040GPIO.configureAsSIOOutput(pin: redPin)
         RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
@@ -45,7 +48,7 @@ struct TrafficLight {
         // Encoder pin assignments (change if you wired differently)
         let dtPin: UInt32 = 14
         let clkPin: UInt32 = 15
-        let swPin: UInt32 = 13 // push switch (optional)
+        let swPin: UInt32 = 13  // push switch (optional)
 
         // Configure encoder pins as inputs with pull-ups (typical wiring)
         RP2040GPIO.configureAsSIOInput(pin: dtPin)
@@ -55,14 +58,15 @@ struct TrafficLight {
         RP2040GPIO.configureAsSIOInput(pin: swPin)
         RP2040GPIO.enablePadPullUp(pin: swPin)
 
+        // Set initial position to 0
         var position: Int = 0
 
-        // show initial state
-        applyPosition(position)
+        // Set initial traffic light state
+        showRed()
 
         while true {
             showCycleIndicator()
-            
+
             // Wait for rising edge on CLK (blocks).
             _ = RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutMs: 10_000)
 
@@ -78,43 +82,44 @@ struct TrafficLight {
             }
 
             // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
-            applyPosition(position)
+            let modulo = ((position % 3) + 3) % 3
+            switch modulo {
+            case 0: showRed()
+            case 1: showYellow()
+            case 2: showGreen()
+            default: showRed()
+            }
 
             // small debounce delay
             pico_delay_ms(250)
         }
     }
 
-    private func applyPosition(_ position: Int) {
-        let modulo = ((position % 3) + 3) % 3
-        switch modulo {
-        case 0: showRed()
-        case 1: showYellow()
-        case 2: showGreen()
-        default: showRed()
-        }
-    }
-
     // MARK: - Helper -
 
+    /// Show a brief indicator on the onboard LED to
+    /// signal a cycle change.
     private func showCycleIndicator() {
         RP2040GPIO.setHigh(pin: ledPin)
         pico_delay_ms(250)
         RP2040GPIO.setLow(pin: ledPin)
     }
 
+    /// Show the red light on, and turn off yellow and green lights.
     private func showRed() {
         RP2040GPIO.setHigh(pin: redPin)
         RP2040GPIO.setLow(pin: yellowPin)
         RP2040GPIO.setLow(pin: greenPin)
     }
 
+    /// Show the yellow light on, and turn off red and green lights.
     private func showYellow() {
         RP2040GPIO.setLow(pin: redPin)
         RP2040GPIO.setHigh(pin: yellowPin)
         RP2040GPIO.setLow(pin: greenPin)
     }
 
+    /// Show the green light on, and turn off red and yellow lights.
     private func showGreen() {
         RP2040GPIO.setLow(pin: redPin)
         RP2040GPIO.setLow(pin: yellowPin)

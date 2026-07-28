@@ -2,7 +2,7 @@
 
 struct GPIOExample {
     // Use the on-board LED and a sample input pin.
-    private let ledPin: UInt32 = PicoBoard.onboardLEDPin
+    private let ledPin: UInt32 = 25
     private let inputPin: UInt32 = 15
 
     /// Run the example. This function never returns.

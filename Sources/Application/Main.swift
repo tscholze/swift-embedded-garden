@@ -14,7 +14,7 @@ public func swift_main() -> Never {
 // MARK: - Samples -
 
 private func blink() -> Never {
-    let ledPin = PicoBoard.onboardLEDPin
+    let ledPin: UInt32 = 25
     RP2040GPIO.configureAsSIOOutput(pin: ledPin)
 
     while true {

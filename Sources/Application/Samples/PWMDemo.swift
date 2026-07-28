@@ -1,7 +1,7 @@
 // PWM demo: Ramp LED brightness using RP2040PWM helpers.
 
 struct PWMDemo {
-    private let ledPin: UInt32 = PicoBoard.onboardLEDPin
+    private let ledPin: UInt32 = 25
 
     func run() -> Never {
         // Configure PWM on LED pin at 1000 Hz, initial 0% duty.
