@@ -32,7 +32,6 @@ init(
     sclPin: UInt32 = 5,
     i2cClockHz: UInt32 = 400_000
 ) {
-    ) {
         self.i2cAddress = i2cAddress
         self.sdaPin = sdaPin
         self.sclPin = sclPin
