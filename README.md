@@ -148,7 +148,7 @@ Scripts/run.sh --no-flash
 
 ## SSD1306 OLED Example
 
-The active firmware sample initializes an Elegoo 0.93-inch 128x64 SSD1306 OLED,
+The active firmware sample initializes an Elegoo 0.96-inch 128x64 SSD1306 OLED,
 draws `Hello Swift Embedded` and basic primitives into a 1,024-byte framebuffer,
 then transfers the framebuffer over RP2040 I2C0.
 
