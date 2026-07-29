@@ -26,11 +26,12 @@ struct PicoSSD1306Configuration {
     ///   - sdaPin: An I2C0-capable GPIO used for SDA. The Pico default is GP4.
     ///   - sclPin: The matching I2C0-capable GPIO used for SCL. The Pico default is GP5.
     ///   - i2cClockHz: Bus frequency. The supplied driver supports up to 400 kHz.
-    init(
-        i2cAddress: UInt8 = 0x3c,
-        sdaPin: UInt32 = 12,
-        sclPin: UInt32 = 13,
-        i2cClockHz: UInt32 = 400_000
+init(
+    i2cAddress: UInt8 = 0x3c,
+    sdaPin: UInt32 = 4,
+    sclPin: UInt32 = 5,
+    i2cClockHz: UInt32 = 400_000
+) {
     ) {
         self.i2cAddress = i2cAddress
         self.sdaPin = sdaPin
