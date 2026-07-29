@@ -28,8 +28,8 @@ struct PicoSSD1306Configuration {
     ///   - i2cClockHz: Bus frequency. The supplied driver supports up to 400 kHz.
     init(
         i2cAddress: UInt8 = 0x3c,
-        sdaPin: UInt32 = 4,
-        sclPin: UInt32 = 5,
+        sdaPin: UInt32 = 12,
+        sclPin: UInt32 = 13,
         i2cClockHz: UInt32 = 400_000
     ) {
         self.i2cAddress = i2cAddress
