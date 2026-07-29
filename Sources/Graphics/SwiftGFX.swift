@@ -167,12 +167,15 @@ struct SwiftGFX {
     /// Values less than one use one.
     mutating func setTextScale(_ scale: Int) { textScale = max(scale, 1) }
 
-    /// Renders an ASCII-compatible string at the current cursor position.
+    /// Renders an ASCII-compatible string literal at the current cursor position.
     ///
     /// UTF-8 bytes outside the minimal glyph table render as a fallback glyph.
     /// A line-feed moves the cursor to x-coordinate zero and advances one glyph row.
-    mutating func drawText(_ text: String, color: Color = .on) {
-        for character in text.utf8 {
+    mutating func drawText(_ text: StaticString, color: Color = .on) {
+        let bytes = text.utf8Start
+        let count = text.utf8CodeUnitCount
+        for i in 0..<count {
+            let character = bytes[i]
             if character == 10 {
                 cursorX = 0
                 cursorY += 8 * textScale

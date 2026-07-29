@@ -90,7 +90,7 @@ struct SSD1306Driver {
     mutating func setTextScale(_ scale: Int) { graphics.setTextScale(scale) }
 
     /// Draws text into the framebuffer; call ``flush()`` to make it visible.
-    mutating func drawText(_ text: String, color: SwiftGFX.Color = .on) { graphics.drawText(text, color: color) }
+    mutating func drawText(_ text: StaticString, color: SwiftGFX.Color = .on) { graphics.drawText(text, color: color) }
 
     /// Turns the SSD1306 panel output on or off while retaining framebuffer RAM.
     mutating func setDisplayEnabled(_ enabled: Bool) -> Result<Void, RP2040I2C.Error> {
