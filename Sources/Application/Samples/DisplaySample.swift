@@ -36,11 +36,7 @@ struct DisplaySample {
         // Draw a title / header
         renderer.drawTitle("Hello Swift Embedded")
 
-        // Draw a few shapes to demonstrate the graphics API.
-        display.drawRect(x: 4, y: 24, width: 34, height: 28)
-        display.fillRect(x: 44, y: 30, width: 24, height: 18)
-        display.drawCircle(x: 93, y: 38, radius: 13)
-        display.fillCircle(x: 116, y: 51, radius: 8)
+        renderer.drawTrafficLight(activeLight: .green)
 
         guard case .success = display.flush() else { displayFaultLoop(blinks: 2) }
         while true {}
