@@ -176,8 +176,6 @@ the SSD1306 display-off and full initialization command sequence instead.
 - `Sources/Display/SSD1306Driver.swift` implements the SSD1306 command/data
   protocol. Its initialization order is a Swift transform of the SSD1306
   datasheet and conventional Adafruit_SSD1306 setup flow.
-- `Sources/BoardSupport/PicoSSD1306.swift` contains only Pico-to-display wiring
-  defaults, making another display wiring arrangement a local configuration change.
 
 Drawing changes only the framebuffer. Call `flush()` after drawing to send the
 updated image to the OLED.
