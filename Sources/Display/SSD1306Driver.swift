@@ -119,8 +119,7 @@ struct SSD1306Driver {
         var start = 0
         while start < graphics.buffer.count {
             let end = min(start + Self.transferPayloadSize, graphics.buffer.count)
-            let chunk = Array(graphics.buffer[start..<end])
-            switch RP2040I2C.write(address: configuration.i2cAddress, control: Self.dataControl, bytes: chunk) {
+            switch RP2040I2C.write(address: configuration.i2cAddress, control: Self.dataControl, bytes: graphics.buffer[start..<end]) {
             case .success: start = end
             case .failure(let error): return .failure(error)
             }

@@ -197,19 +197,30 @@ while (mmioRead(resetsBase + resetDoneOffset) & resetBit) == 0 {
     /// subsequent payload byte waits for `TX_EMPTY`, matching the Pico SDK's
     /// blocking write behavior; the final byte requests STOP.
     ///
+    /// Accepting a generic `Collection` lets callers pass an `ArraySlice`
+    /// directly, avoiding a heap copy per call.
+    ///
     /// - Parameters:
     ///   - address: Seven-bit target address selected while I2C0 is disabled.
     ///   - control: Device-specific prefix, such as SSD1306 `0x00` or `0x40`.
     ///   - bytes: Non-control bytes to send after the prefix.
     /// - Returns: A transport error or success after STOP is observed.
-    static func write(address: UInt8, control: UInt8, bytes: [UInt8]) -> Result<Void, Error> {
+    static func write<C: Collection>(address: UInt8, control: UInt8, bytes: C) -> Result<Void, Error>
+    where C.Element == UInt8 {
         guard address <= 0x7f else { return .failure(.invalidClock) }
         guard selectTarget(address) else { return .failure(.timeout) }
         clearInterruptState()
 
         let totalCount = bytes.count + 1
+        var byteIndex = bytes.startIndex
         for index in 0..<totalCount {
-            let value = index == 0 ? control : bytes[index - 1]
+            let value: UInt8
+            if index == 0 {
+                value = control
+            } else {
+                value = bytes[byteIndex]
+                byteIndex = bytes.index(after: byteIndex)
+            }
             let stop = index == totalCount - 1 ? dataCmdStop : 0
             mmioWrite(base + dataCmdOffset, UInt32(value) | stop)
             switch waitForTransmitComplete() {
