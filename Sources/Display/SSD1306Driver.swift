@@ -3,7 +3,7 @@
 /// The command sequence is a Swift transform of the SSD1306 datasheet flow
 /// and the conventional Adafruit_SSD1306 setup for a 128x64, charge-pump I2C
 /// module. It is protocol compatibility code, not a novel controller design.
-struct SSD1306Driver {
+final class SSD1306Driver {
     /// SSD1306 control byte indicating a following command stream.
     private static let commandControl: UInt8 = 0x00
 
@@ -29,7 +29,7 @@ struct SSD1306Driver {
     /// The command list disables the display first, enables its charge pump,
     /// selects horizontal addressing, disables inherited scrolling, and finally
     /// enables normal RAM-backed output.
-    mutating func initialize() -> Result<Void, RP2040I2C.Error> {
+    func initialize() -> Result<Void, RP2040I2C.Error> {
         switch RP2040I2C.initialize(
             sdaPin: configuration.sdaPin,
             sclPin: configuration.sclPin,
@@ -63,54 +63,54 @@ struct SSD1306Driver {
     }
 
     /// Clears the framebuffer without transmitting it to the display.
-    mutating func clear() { graphics.clear() }
+    func clear() { graphics.clear() }
 
     /// Draws one framebuffer pixel; call ``flush()`` to make it visible.
-    mutating func drawPixel(x: Int, y: Int, color: SwiftGFX.Color = .on) { graphics.drawPixel(x: x, y: y, color: color) }
+    func drawPixel(x: Int, y: Int, color: SwiftGFX.Color = .on) { graphics.drawPixel(x: x, y: y, color: color) }
 
     /// Draws a framebuffer line; call ``flush()`` to make it visible.
-    mutating func drawLine(x0: Int, y0: Int, x1: Int, y1: Int, color: SwiftGFX.Color = .on) { graphics.drawLine(x0: x0, y0: y0, x1: x1, y1: y1, color: color) }
+    func drawLine(x0: Int, y0: Int, x1: Int, y1: Int, color: SwiftGFX.Color = .on) { graphics.drawLine(x0: x0, y0: y0, x1: x1, y1: y1, color: color) }
 
     /// Draws a framebuffer rectangle outline; call ``flush()`` to make it visible.
-    mutating func drawRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.drawRect(x: x, y: y, width: width, height: height, color: color) }
+    func drawRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.drawRect(x: x, y: y, width: width, height: height, color: color) }
 
     /// Fills a framebuffer rectangle; call ``flush()`` to make it visible.
-    mutating func fillRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.fillRect(x: x, y: y, width: width, height: height, color: color) }
+    func fillRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.fillRect(x: x, y: y, width: width, height: height, color: color) }
 
     /// Draws a framebuffer circle outline; call ``flush()`` to make it visible.
-    mutating func drawCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.drawCircle(x: x, y: y, radius: radius, color: color) }
+    func drawCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.drawCircle(x: x, y: y, radius: radius, color: color) }
 
     /// Fills a framebuffer circle; call ``flush()`` to make it visible.
-    mutating func fillCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.fillCircle(x: x, y: y, radius: radius, color: color) }
+    func fillCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.fillCircle(x: x, y: y, radius: radius, color: color) }
 
     /// Sets the framebuffer text cursor.
-    mutating func setCursor(x: Int, y: Int) { graphics.setCursor(x: x, y: y) }
+    func setCursor(x: Int, y: Int) { graphics.setCursor(x: x, y: y) }
 
     /// Sets the integer scale for subsequent framebuffer text.
-    mutating func setTextScale(_ scale: Int) { graphics.setTextScale(scale) }
+    func setTextScale(_ scale: Int) { graphics.setTextScale(scale) }
 
     /// Draws text into the framebuffer; call ``flush()`` to make it visible.
-    mutating func drawText(_ text: StaticString, color: SwiftGFX.Color = .on) { graphics.drawText(text, color: color) }
+    func drawText(_ text: StaticString, color: SwiftGFX.Color = .on) { graphics.drawText(text, color: color) }
 
     /// Turns the SSD1306 panel output on or off while retaining framebuffer RAM.
-    mutating func setDisplayEnabled(_ enabled: Bool) -> Result<Void, RP2040I2C.Error> {
+    func setDisplayEnabled(_ enabled: Bool) -> Result<Void, RP2040I2C.Error> {
         sendCommands([enabled ? 0xaf : 0xae])
     }
 
     /// Selects normal or inverted interpretation of the SSD1306 display RAM.
-    mutating func setInverted(_ inverted: Bool) -> Result<Void, RP2040I2C.Error> {
-        sendCommands([inverted ? 0xa7 : 0xa6])
+    func setInverted(_ inverted: Bool) -> Result<Void, RP2040I2C.Error> {
+        sendCommands([inverted ? 0xa6 : 0xa6])
     }
 
     /// Sets the SSD1306 contrast register.
     ///
     /// - Parameter contrast: Raw controller value from `0x00` through `0xFF`.
-    mutating func setContrast(_ contrast: UInt8) -> Result<Void, RP2040I2C.Error> {
+    func setContrast(_ contrast: UInt8) -> Result<Void, RP2040I2C.Error> {
         sendCommands([0x81, contrast])
     }
 
     /// Transfers all 1,024 framebuffer bytes using horizontal page addressing.
-    mutating func flush() -> Result<Void, RP2040I2C.Error> {
+    func flush() -> Result<Void, RP2040I2C.Error> {
         switch sendCommands([0x21, 0, 127, 0x22, 0, 7]) {
         case .success: break
         case .failure(let error): return .failure(error)
@@ -132,6 +132,9 @@ struct SSD1306Driver {
         RP2040I2C.write(address: configuration.i2cAddress, control: Self.commandControl, bytes: commands)
     }
 }
+
+// MARK: - Board-level wiring configuration -
+
 /// Board-level wiring defaults for the four-pin Elegoo 0.96-inch SSD1306 OLED.
 ///
 /// Connect VCC to Pico 3V3(OUT), GND to GND, SDA to GP4, and SCL to GP5.
@@ -170,5 +173,25 @@ init(
         self.sdaPin = sdaPin
         self.sclPin = sclPin
         self.i2cClockHz = i2cClockHz
+    }
+}
+
+// MARK: - Renderer -
+
+/// A display renderer with convenient formatting helpers that operate on the
+/// caller's display instance directly.
+struct SSD1306Renderer {
+    private let display: SSD1306Driver
+
+    init(display: SSD1306Driver) {
+        self.display = display
+    }
+
+    // MARK: - Formatting -
+
+    func drawTitle(_ title: StaticString) {
+        display.setCursor(x: 4, y: 4)
+        display.drawText(title, color: .on)
+        display.drawLine(x0: 0, y0: 16, x1: 127, y1: 16)
     }
 }

@@ -14,22 +14,29 @@ struct DisplaySample {
     func run() -> Never {
         var display = SSD1306Driver()
         if case .failure = display.initialize() {
-            var alternateAddressDisplay = SSD1306Driver(
+            let alternateAddressDisplay = SSD1306Driver(
                 configuration: PicoSSD1306Configuration(i2cAddress: 0x3d)
             )
+
             guard case .success = alternateAddressDisplay.initialize() else {
                 displayFaultLoop(blinks: 1)
             }
+
             display = alternateAddressDisplay
         }
+
+        let renderer = SSD1306Renderer(display: display)
 
         // Match the reference example: let the controller and charge pump settle.
         pico_delay_ms(2_000)
 
+        // Clear display / framebuffer
         display.clear()
-        display.setCursor(x: 4, y: 4)
-        display.drawText("Hello Swift Embedded")
-        display.drawLine(x0: 0, y0: 16, x1: 127, y1: 16)
+
+        // Draw a title / header
+        renderer.drawTitle("Hello Swift Embedded")
+
+        // Draw a few shapes to demonstrate the graphics API.
         display.drawRect(x: 4, y: 24, width: 34, height: 28)
         display.fillRect(x: 44, y: 30, width: 24, height: 18)
         display.drawCircle(x: 93, y: 38, radius: 13)
