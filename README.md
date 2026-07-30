@@ -142,6 +142,45 @@ Scripts/run.sh --no-flash
 - `CMake/bootstrap.c` calls `swift_main()` from Swift as firmware entry.
 - Blink timing uses Pico SDK `sleep_ms` through a tiny C bridge so the blink
   period stays visible even under aggressive optimization.
+- The shared Swift MMIO API uses a two-function volatile C boundary. This keeps
+  register maps and peripheral logic in Swift while retaining the volatile
+  reads and writes required by RP2040 device memory.
+
+## SSD1306 OLED Example
+
+The active firmware sample initializes an Elegoo 0.96-inch 128x64 SSD1306 OLED,
+draws `Hello Swift Embedded` and basic primitives into a 1,024-byte framebuffer,
+then transfers the framebuffer over RP2040 I2C0.
+
+### Wiring
+
+| OLED pin | Raspberry Pi Pico pin |
+| --- | --- |
+| VCC | 3V3(OUT) |
+| GND | GND |
+| SDA | GP4 |
+| SCL | GP5 |
+
+The example tries I2C addresses `0x3C` and `0x3D`; `0x3C` is the default used
+by the Elegoo documentation. The module has no reset wire, so the driver uses
+the SSD1306 display-off and full initialization command sequence instead.
+
+### Module Boundaries
+
+- `Sources/Hardware/RP2040I2C.swift` configures I2C0 by direct register access.
+  Its register timing and blocking write behavior are a Swift transform of the
+  Pico SDK `hardware_i2c` implementation.
+- `Sources/Graphics/SwiftGFX.swift` owns the display-independent one-bit
+  framebuffer and raster primitives. Its compact font uses the classic 5x7
+  column format compatible with the bundled Adafruit_GFX font.
+- `Sources/Display/SSD1306Driver.swift` implements the SSD1306 command/data
+  protocol. Its initialization order is a Swift transform of the SSD1306
+  datasheet and conventional Adafruit_SSD1306 setup flow.
+- `Sources/BoardSupport/PicoSSD1306.swift` contains only Pico-to-display wiring
+  defaults, making another display wiring arrangement a local configuration change.
+
+Drawing changes only the framebuffer. Call `flush()` after drawing to send the
+updated image to the OLED.
 
 ## Extending with drivers (GPIO, UART, I2C, SPI)
 

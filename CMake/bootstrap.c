@@ -1,5 +1,5 @@
-// C bootstrap for RP2040 startup.
-// Pico SDK startup lands here, then we jump into Swift embedded firmware code.
+// RP2040 firmware bootstrap and the minimal C boundary for Swift Embedded.
+// Pico SDK startup lands here, then main jumps into swift_main().
 
 #include "pico/stdlib.h"
 #include <errno.h>
@@ -25,9 +25,19 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
   return 0;
 }
 
-// Exposed to Swift so blink timing is driven by a hardware-backed SDK delay.
+// Exposed to Swift so delay loops use the Pico SDK timer implementation.
 void pico_delay_ms(uint32_t ms) {
   sleep_ms(ms);
+}
+
+// Swift's raw-pointer loads and stores are not volatile. These functions retain
+// the required volatile MMIO semantics while keeping register maps in Swift.
+uint32_t rp2040_mmio_read(uint32_t address) {
+  return *(volatile const uint32_t *)(uintptr_t)address;
+}
+
+void rp2040_mmio_write(uint32_t address, uint32_t value) {
+  *(volatile uint32_t *)(uintptr_t)address = value;
 }
 
 int main(void) {

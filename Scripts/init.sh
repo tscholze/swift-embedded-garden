@@ -155,6 +155,17 @@ EOF
   chmod +x "${output}"
 }
 
+# Installs the Swift-format pre-commit hook from Scripts/hooks/pre-commit.
+install_git_hooks() {
+  local hooks_dir="${PROJECT_ROOT}/.git/hooks"
+  local hook_src="${PROJECT_ROOT}/Scripts/hooks/pre-commit"
+  local hook_dst="${hooks_dir}/pre-commit"
+  mkdir -p "${hooks_dir}"
+  cp "${hook_src}" "${hook_dst}"
+  chmod +x "${hook_dst}"
+  log "Installed pre-commit hook: .git/hooks/pre-commit"
+}
+
 # Writes Scripts/env.sh so build scripts can load generated paths.
 write_env_file() {
   cat > "${PROJECT_ROOT}/Scripts/env.sh" <<EOF
@@ -180,6 +191,7 @@ main() {
   ensure_pico_sdk
   ensure_elf2uf2
   write_env_file
+  install_git_hooks
 
   log "Initialization complete."
   log "Run: source Scripts/env.sh"

@@ -1,9 +1,8 @@
 // swift-tools-version: 6.0
 //
-// This package manifest is intentionally ready for future Swift Embedded growth.
-// The current CMake pipeline performs firmware linking with the Pico SDK, while
-// this file provides a clean place to add Swift package dependencies and modular
-// source organization over time.
+// SwiftPM source-layout metadata for editor tooling and future dependencies.
+// Firmware linking is performed by CMake because it combines the Swift object
+// with Pico SDK startup, the volatile MMIO bridge, and RP2040 linker settings.
 
 import PackageDescription
 
@@ -27,10 +26,12 @@ let package = Package(
             sources: [
                 "Application",
                 "BoardSupport",
+                "Display",
+                "Graphics",
                 "Hardware",
             ],
             swiftSettings: [
-                // Keep the current target focused on embedded-safe code patterns.
+                // Mirrors the CMake Swift Embedded compilation mode for editor builds.
                 .unsafeFlags([
                     "-enable-experimental-feature",
                     "Embedded",
