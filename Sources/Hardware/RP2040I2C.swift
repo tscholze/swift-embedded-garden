@@ -150,9 +150,13 @@ enum RP2040I2C {
             return .failure(.invalidClock)
         }
 
-        mmioSetBits(resetsBase + resetOffset, resetBit)
-        mmioClearBits(resetsBase + resetOffset, resetBit)
-        while (mmioRead(resetsBase + resetDoneOffset) & resetBit) == 0 {}
+mmioSetBits(resetsBase + resetOffset, resetBit)
+mmioClearBits(resetsBase + resetOffset, resetBit)
+var resetPolls = 0
+while (mmioRead(resetsBase + resetDoneOffset) & resetBit) == 0 {
+    resetPolls += 1
+    if resetPolls >= pollLimit { return .failure(.timeout) }
+}
 
         // The display normally has external pull-ups, but internal pull-ups
         // keep both lines high on a loosely wired prototype bus as well.
