@@ -310,8 +310,6 @@ let package = Package(
             sources: [
                 "Application",
                 "BoardSupport",
-              "Display",
-              "Graphics",
                 "Hardware",
             ],
             swiftSettings: [
@@ -351,13 +349,9 @@ pico_sdk_init()
 
 set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/BoardSupport/PicoSSD1306.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Display/SSD1306Driver.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Graphics/SwiftGFX.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/BoardSupport/PicoBoard.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040GPIO.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040I2C.swift"
 )
 
 compile_swift_embedded_object(
@@ -484,14 +478,6 @@ void pico_delay_ms(uint32_t ms) {
   sleep_ms(ms);
 }
 
-uint32_t rp2040_mmio_read(uint32_t address) {
-  return *(volatile const uint32_t *)(uintptr_t)address;
-}
-
-void rp2040_mmio_write(uint32_t address, uint32_t value) {
-  *(volatile uint32_t *)(uintptr_t)address = value;
-}
-
 int main(void) {
   swift_main();
   for (;;) {
@@ -505,62 +491,41 @@ EOF
 
 @_cdecl("swift_main")
 public func swift_main() -> Never {
-  let ledPin: UInt32 = 25
-  RP2040GPIO.configureAsSIOOutput(pin: ledPin)
+    let ledPin = PicoBoard.onboardLEDPin
+    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
 
-  while true {
-    RP2040GPIO.setHigh(pin: ledPin)
-    pico_delay_ms(250)
-    RP2040GPIO.setLow(pin: ledPin)
-    pico_delay_ms(250)
-  }
+    while true {
+        RP2040GPIO.setHigh(pin: ledPin)
+        pico_delay_ms(250)
+        RP2040GPIO.setLow(pin: ledPin)
+        pico_delay_ms(250)
+    }
 }
 
 @_silgen_name("pico_delay_ms")
-func pico_delay_ms(_ ms: UInt32)
+private func pico_delay_ms(_ ms: UInt32)
 EOF
 
-  emit_template "${OUTPUT_DIR}/Sources/BoardSupport/PicoSSD1306.swift" <<'EOF'
-/// Board-level wiring defaults for a four-pin 128x64 SSD1306 OLED.
-///
-/// Connect VCC to Pico 3V3(OUT), GND to GND, SDA to GP4, and SCL to GP5.
-struct PicoSSD1306Configuration {
-  let i2cAddress: UInt8
-  let sdaPin: UInt32
-  let sclPin: UInt32
-  let i2cClockHz: UInt32
+  emit_template "${OUTPUT_DIR}/Sources/BoardSupport/PicoBoard.swift" <<'EOF'
+// Board support mapping for Raspberry Pi Pico.
 
-  init(
-    i2cAddress: UInt8 = 0x3c,
-    sdaPin: UInt32 = 4,
-    sclPin: UInt32 = 5,
-    i2cClockHz: UInt32 = 400_000
-  ) {
-    self.i2cAddress = i2cAddress
-    self.sdaPin = sdaPin
-    self.sclPin = sclPin
-    self.i2cClockHz = i2cClockHz
-  }
+enum PicoBoard {
+    // Raspberry Pi Pico onboard LED is on GPIO25.
+    static let onboardLEDPin: UInt32 = 25
 }
 EOF
 
   emit_template "${OUTPUT_DIR}/Sources/Hardware/MMIO.swift" <<'EOF'
-/// Minimal volatile MMIO bridge for Swift Embedded.
-
-@_silgen_name("rp2040_mmio_read")
-private func rp2040MMIORead(_ address: UInt32) -> UInt32
-
-@_silgen_name("rp2040_mmio_write")
-private func rp2040MMIOWrite(_ address: UInt32, _ value: UInt32)
+// Minimal MMIO helper layer for Swift Embedded.
 
 @inline(__always)
 func mmioRead(_ address: UInt32) -> UInt32 {
-  rp2040MMIORead(address)
+    UnsafeMutablePointer<UInt32>(bitPattern: UInt(address))!.pointee
 }
 
 @inline(__always)
 func mmioWrite(_ address: UInt32, _ value: UInt32) {
-  rp2040MMIOWrite(address, value)
+    UnsafeMutablePointer<UInt32>(bitPattern: UInt(address))!.pointee = value
 }
 
 @inline(__always)
@@ -573,436 +538,6 @@ func mmioSetBits(_ address: UInt32, _ mask: UInt32) {
 func mmioClearBits(_ address: UInt32, _ mask: UInt32) {
     let current = mmioRead(address)
     mmioWrite(address, current & ~mask)
-}
-EOF
-
-  emit_template "${OUTPUT_DIR}/Sources/Application/Samples/DisplaySample.swift" <<'EOF'
-/// Demonstrates a 128x64 SSD1306 OLED on I2C0 (GP4 SDA, GP5 SCL).
-struct DisplaySample {
-  func run() -> Never {
-    var display = SSD1306Driver()
-    if case .failure = display.initialize() {
-      var alternateAddressDisplay = SSD1306Driver(
-        configuration: PicoSSD1306Configuration(i2cAddress: 0x3d)
-      )
-      guard case .success = alternateAddressDisplay.initialize() else {
-        displayFaultLoop(blinks: 1)
-      }
-      display = alternateAddressDisplay
-    }
-
-    pico_delay_ms(2_000)
-    display.clear()
-    display.setCursor(x: 4, y: 4)
-    display.drawText("Hello Swift Embedded")
-    display.drawLine(x0: 0, y0: 16, x1: 127, y1: 16)
-    display.drawRect(x: 4, y: 24, width: 34, height: 28)
-    display.fillRect(x: 44, y: 30, width: 24, height: 18)
-    display.drawCircle(x: 93, y: 38, radius: 13)
-    display.fillCircle(x: 116, y: 51, radius: 8)
-
-    guard case .success = display.flush() else { displayFaultLoop(blinks: 2) }
-    while true {}
-  }
-
-  private func displayFaultLoop(blinks: UInt32) -> Never {
-    let ledPin: UInt32 = 25
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
-    while true {
-      for _ in 0..<blinks {
-        RP2040GPIO.setHigh(pin: ledPin)
-        pico_delay_ms(120)
-        RP2040GPIO.setLow(pin: ledPin)
-        pico_delay_ms(180)
-      }
-      pico_delay_ms(1_000)
-    }
-  }
-}
-EOF
-
-  emit_template "${OUTPUT_DIR}/Sources/Display/SSD1306Driver.swift" <<'EOF'
-/// SSD1306 128x64 I2C display driver backed by a SwiftGFX canvas.
-struct SSD1306Driver {
-  private static let commandControl: UInt8 = 0x00
-  private static let dataControl: UInt8 = 0x40
-  private static let transferPayloadSize = 15
-
-  private let configuration: PicoSSD1306Configuration
-  private(set) var graphics = SwiftGFX()
-
-  init(configuration: PicoSSD1306Configuration = PicoSSD1306Configuration()) {
-    self.configuration = configuration
-  }
-
-  mutating func initialize() -> Result<Void, RP2040I2C.Error> {
-    switch RP2040I2C.initialize(
-      sdaPin: configuration.sdaPin,
-      sclPin: configuration.sclPin,
-      clockHz: configuration.i2cClockHz,
-      targetAddress: configuration.i2cAddress
-    ) {
-    case .success: break
-    case .failure(let error): return .failure(error)
-    }
-
-    return sendCommands([
-      0xae, 0xd5, 0x80, 0xa8, 0x3f, 0xd3, 0x00, 0x40,
-      0x8d, 0x14, 0x20, 0x00, 0xa1, 0xc8, 0xda, 0x12,
-      0x81, 0xcf, 0xd9, 0xf1, 0xdb, 0x40, 0xa4, 0xa6,
-      0x2e, 0xaf
-    ])
-  }
-
-  mutating func clear() { graphics.clear() }
-  mutating func setCursor(x: Int, y: Int) { graphics.setCursor(x: x, y: y) }
-  mutating func drawText(_ text: String, color: SwiftGFX.Color = .on) { graphics.drawText(text, color: color) }
-  mutating func drawLine(x0: Int, y0: Int, x1: Int, y1: Int, color: SwiftGFX.Color = .on) { graphics.drawLine(x0: x0, y0: y0, x1: x1, y1: y1, color: color) }
-  mutating func drawRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.drawRect(x: x, y: y, width: width, height: height, color: color) }
-  mutating func fillRect(x: Int, y: Int, width: Int, height: Int, color: SwiftGFX.Color = .on) { graphics.fillRect(x: x, y: y, width: width, height: height, color: color) }
-  mutating func drawCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.drawCircle(x: x, y: y, radius: radius, color: color) }
-  mutating func fillCircle(x: Int, y: Int, radius: Int, color: SwiftGFX.Color = .on) { graphics.fillCircle(x: x, y: y, radius: radius, color: color) }
-
-  mutating func flush() -> Result<Void, RP2040I2C.Error> {
-    switch sendCommands([0x21, 0, 127, 0x22, 0, 7]) {
-    case .success: break
-    case .failure(let error): return .failure(error)
-    }
-
-    var start = 0
-    while start < graphics.buffer.count {
-      let end = min(start + Self.transferPayloadSize, graphics.buffer.count)
-      let chunk = Array(graphics.buffer[start..<end])
-      switch RP2040I2C.write(address: configuration.i2cAddress, control: Self.dataControl, bytes: chunk) {
-      case .success: start = end
-      case .failure(let error): return .failure(error)
-      }
-    }
-    return .success(())
-  }
-
-  private func sendCommands(_ commands: [UInt8]) -> Result<Void, RP2040I2C.Error> {
-    RP2040I2C.write(address: configuration.i2cAddress, control: Self.commandControl, bytes: commands)
-  }
-}
-EOF
-
-  emit_template "${OUTPUT_DIR}/Sources/Graphics/SwiftGFX.swift" <<'EOF'
-/// A compact, page-addressed 128x64 one-bit graphics canvas.
-struct SwiftGFX {
-  enum Color { case off, on, invert }
-
-  static let width = 128
-  static let height = 64
-  static let bufferSize = width * height / 8
-
-  private(set) var buffer = [UInt8](repeating: 0, count: bufferSize)
-  private var cursorX = 0
-  private var cursorY = 0
-  private var textScale = 1
-
-  mutating func clear(_ color: Color = .off) {
-    let fill: UInt8 = color == .on ? 0xff : 0
-    for index in buffer.indices { buffer[index] = fill }
-  }
-
-  mutating func drawPixel(x: Int, y: Int, color: Color = .on) {
-    guard x >= 0, x < Self.width, y >= 0, y < Self.height else { return }
-    let index = x + (y >> 3) * Self.width
-    let mask = UInt8(1 << (y & 7))
-    switch color {
-    case .off: buffer[index] &= ~mask
-    case .on: buffer[index] |= mask
-    case .invert: buffer[index] ^= mask
-    }
-  }
-
-  mutating func drawLine(x0: Int, y0: Int, x1: Int, y1: Int, color: Color = .on) {
-    var currentX = x0
-    var currentY = y0
-    let deltaX = abs(x1 - x0)
-    let stepX = x0 < x1 ? 1 : -1
-    let deltaY = -abs(y1 - y0)
-    let stepY = y0 < y1 ? 1 : -1
-    var error = deltaX + deltaY
-    while true {
-      drawPixel(x: currentX, y: currentY, color: color)
-      if currentX == x1 && currentY == y1 { return }
-      let twiceError = error * 2
-      if twiceError >= deltaY { error += deltaY; currentX += stepX }
-      if twiceError <= deltaX { error += deltaX; currentY += stepY }
-    }
-  }
-
-  mutating func drawRect(x: Int, y: Int, width: Int, height: Int, color: Color = .on) {
-    guard width > 0, height > 0 else { return }
-    drawLine(x0: x, y0: y, x1: x + width - 1, y1: y, color: color)
-    drawLine(x0: x, y0: y + height - 1, x1: x + width - 1, y1: y + height - 1, color: color)
-    drawLine(x0: x, y0: y, x1: x, y1: y + height - 1, color: color)
-    drawLine(x0: x + width - 1, y0: y, x1: x + width - 1, y1: y + height - 1, color: color)
-  }
-
-  mutating func fillRect(x: Int, y: Int, width: Int, height: Int, color: Color = .on) {
-    guard width > 0, height > 0 else { return }
-    for row in 0..<height { drawLine(x0: x, y0: y + row, x1: x + width - 1, y1: y + row, color: color) }
-  }
-
-  mutating func drawCircle(x: Int, y: Int, radius: Int, color: Color = .on) {
-    guard radius >= 0 else { return }
-    var offsetX = radius
-    var offsetY = 0
-    var error = 1 - radius
-    while offsetX >= offsetY {
-      drawPixel(x: x + offsetX, y: y + offsetY, color: color)
-      drawPixel(x: x + offsetY, y: y + offsetX, color: color)
-      drawPixel(x: x - offsetY, y: y + offsetX, color: color)
-      drawPixel(x: x - offsetX, y: y + offsetY, color: color)
-      drawPixel(x: x - offsetX, y: y - offsetY, color: color)
-      drawPixel(x: x - offsetY, y: y - offsetX, color: color)
-      drawPixel(x: x + offsetY, y: y - offsetX, color: color)
-      drawPixel(x: x + offsetX, y: y - offsetY, color: color)
-      offsetY += 1
-      if error < 0 { error += 2 * offsetY + 1 } else { offsetX -= 1; error += 2 * (offsetY - offsetX) + 1 }
-    }
-  }
-
-  mutating func fillCircle(x: Int, y: Int, radius: Int, color: Color = .on) {
-    guard radius >= 0 else { return }
-    for offsetY in -radius...radius {
-      let squared = radius * radius - offsetY * offsetY
-      var offsetX = 0
-      while (offsetX + 1) * (offsetX + 1) <= squared { offsetX += 1 }
-      drawLine(x0: x - offsetX, y0: y + offsetY, x1: x + offsetX, y1: y + offsetY, color: color)
-    }
-  }
-
-  mutating func setCursor(x: Int, y: Int) { cursorX = x; cursorY = y }
-  mutating func setTextScale(_ scale: Int) { textScale = max(scale, 1) }
-
-  mutating func drawText(_ text: String, color: Color = .on) {
-    for character in text.utf8 {
-      if character == 10 {
-        cursorX = 0
-        cursorY += 8 * textScale
-      } else {
-        drawCharacter(character, x: cursorX, y: cursorY, color: color)
-        cursorX += 6 * textScale
-      }
-    }
-  }
-
-  private mutating func drawCharacter(_ character: UInt8, x: Int, y: Int, color: Color) {
-    let columns = glyphColumns(for: character)
-    for column in 0..<5 {
-      for row in 0..<7 where (columns[column] & UInt8(1 << row)) != 0 {
-        fillRect(x: x + column * textScale, y: y + row * textScale, width: textScale, height: textScale, color: color)
-      }
-    }
-  }
-
-  private func glyphColumns(for character: UInt8) -> [UInt8] {
-    let uppercase = character >= 97 && character <= 122 ? character - 32 : character
-    switch uppercase {
-    case 32: return [0, 0, 0, 0, 0]
-    case 45: return [8, 8, 8, 8, 8]
-    case 48: return [62, 81, 73, 69, 62]
-    case 49: return [0, 66, 127, 64, 0]
-    case 50: return [66, 97, 81, 73, 70]
-    case 51: return [33, 65, 69, 75, 49]
-    case 52: return [24, 20, 18, 127, 16]
-    case 53: return [39, 69, 69, 69, 57]
-    case 54: return [60, 74, 73, 73, 48]
-    case 55: return [1, 113, 9, 5, 3]
-    case 56: return [54, 73, 73, 73, 54]
-    case 57: return [6, 73, 73, 41, 30]
-    case 65: return [126, 17, 17, 17, 126]
-    case 66: return [127, 73, 73, 73, 54]
-    case 67: return [62, 65, 65, 65, 34]
-    case 68: return [127, 65, 65, 34, 28]
-    case 69: return [127, 73, 73, 73, 65]
-    case 70: return [127, 9, 9, 9, 1]
-    case 71: return [62, 65, 73, 73, 122]
-    case 72: return [127, 8, 8, 8, 127]
-    case 73: return [0, 65, 127, 65, 0]
-    case 74: return [32, 64, 65, 63, 1]
-    case 75: return [127, 8, 20, 34, 65]
-    case 76: return [127, 64, 64, 64, 64]
-    case 77: return [127, 2, 12, 2, 127]
-    case 78: return [127, 4, 8, 16, 127]
-    case 79: return [62, 65, 65, 65, 62]
-    case 80: return [127, 9, 9, 9, 6]
-    case 81: return [62, 65, 81, 33, 94]
-    case 82: return [127, 9, 25, 41, 70]
-    case 83: return [70, 73, 73, 73, 49]
-    case 84: return [1, 1, 127, 1, 1]
-    case 85: return [63, 64, 64, 64, 63]
-    case 86: return [31, 32, 64, 32, 31]
-    case 87: return [127, 32, 24, 32, 127]
-    case 88: return [99, 20, 8, 20, 99]
-    case 89: return [3, 4, 120, 4, 3]
-    case 90: return [97, 81, 73, 69, 67]
-    default: return [2, 1, 89, 9, 6]
-    }
-  }
-}
-EOF
-
-  emit_template "${OUTPUT_DIR}/Sources/Hardware/RP2040I2C.swift" <<'EOF'
-/// RP2040 I2C0 master transport for I2C devices such as an SSD1306 OLED.
-enum RP2040I2C {
-  enum Error: Swift.Error {
-    case invalidPins
-    case invalidClock
-    case timeout
-    case aborted(UInt32)
-  }
-
-  private static let base: UInt32 = 0x4004_4000
-  private static let resetsBase: UInt32 = 0x4000_c000
-  private static let resetOffset: UInt32 = 0x00
-  private static let resetDoneOffset: UInt32 = 0x08
-  private static let resetBit: UInt32 = 1 << 3
-  private static let conOffset: UInt32 = 0x00
-  private static let tarOffset: UInt32 = 0x04
-  private static let dataCmdOffset: UInt32 = 0x10
-  private static let fsSclHcntOffset: UInt32 = 0x1c
-  private static let fsSclLcntOffset: UInt32 = 0x20
-  private static let rawIntrStatOffset: UInt32 = 0x34
-  private static let rxTlOffset: UInt32 = 0x38
-  private static let txTlOffset: UInt32 = 0x3c
-  private static let clrTxAbrtOffset: UInt32 = 0x54
-  private static let clrStopDetOffset: UInt32 = 0x60
-  private static let enableOffset: UInt32 = 0x6c
-  private static let txFlrOffset: UInt32 = 0x74
-  private static let sdaHoldOffset: UInt32 = 0x7c
-  private static let txAbrtSourceOffset: UInt32 = 0x80
-  private static let dmaCrOffset: UInt32 = 0x88
-  private static let enableStatusOffset: UInt32 = 0x9c
-  private static let fsSpklenOffset: UInt32 = 0xa0
-
-  private static let conMasterMode: UInt32 = 1 << 0
-  private static let conSpeedFast: UInt32 = 2 << 1
-  private static let conRestartEnable: UInt32 = 1 << 5
-  private static let conSlaveDisable: UInt32 = 1 << 6
-  private static let conTransmitEmptyControl: UInt32 = 1 << 8
-  private static let dataCmdStop: UInt32 = 1 << 9
-  private static let rawInterruptStopDetected: UInt32 = 1 << 9
-  private static let rawInterruptTransmitAbort: UInt32 = 1 << 6
-  private static let rawInterruptTransmitEmpty: UInt32 = 1 << 4
-  private static let i2cFunction: UInt32 = 3
-  private static let systemClockHz: UInt32 = 125_000_000
-  private static let pollLimit = 1_000_000
-
-  static func initialize(
-    sdaPin: UInt32,
-    sclPin: UInt32,
-    clockHz: UInt32,
-    targetAddress: UInt8
-  ) -> Result<Void, Error> {
-    guard isI2C0Pair(sda: sdaPin, scl: sclPin) else { return .failure(.invalidPins) }
-    guard clockHz > 0, clockHz <= 400_000, targetAddress <= 0x7f else {
-      return .failure(.invalidClock)
-    }
-
-    mmioSetBits(resetsBase + resetOffset, resetBit)
-    mmioClearBits(resetsBase + resetOffset, resetBit)
-    while (mmioRead(resetsBase + resetDoneOffset) & resetBit) == 0 {}
-
-    RP2040GPIO.enablePadPullUp(pin: sdaPin)
-    RP2040GPIO.enablePadPullUp(pin: sclPin)
-    RP2040GPIO.setFunction(pin: sdaPin, funcSel: i2cFunction)
-    RP2040GPIO.setFunction(pin: sclPin, funcSel: i2cFunction)
-
-    mmioWrite(base + enableOffset, 0)
-    guard waitForDisabled() else { return .failure(.timeout) }
-
-    let periodTicks = (systemClockHz + clockHz / 2) / clockHz
-    let lowCount = periodTicks * 3 / 5
-    let highCount = periodTicks - lowCount
-    let sdaHoldCount = ((systemClockHz * 3) / 10_000_000) + 1
-    mmioWrite(base + fsSclHcntOffset, highCount)
-    mmioWrite(base + fsSclLcntOffset, lowCount)
-    mmioWrite(base + fsSpklenOffset, max(lowCount / 16, 1))
-    mmioWrite(base + sdaHoldOffset, sdaHoldCount)
-    mmioWrite(base + rxTlOffset, 0)
-    mmioWrite(base + txTlOffset, 0)
-    mmioWrite(base + dmaCrOffset, 0x3)
-    mmioWrite(base + conOffset, conMasterMode | conSpeedFast | conRestartEnable | conSlaveDisable | conTransmitEmptyControl)
-    mmioWrite(base + tarOffset, UInt32(targetAddress))
-    mmioWrite(base + enableOffset, 1)
-    clearInterruptState()
-    return .success(())
-  }
-
-  static func write(address: UInt8, control: UInt8, bytes: [UInt8]) -> Result<Void, Error> {
-    guard address <= 0x7f else { return .failure(.invalidClock) }
-    guard selectTarget(address) else { return .failure(.timeout) }
-    clearInterruptState()
-
-    let totalCount = bytes.count + 1
-    for index in 0..<totalCount {
-      let value = index == 0 ? control : bytes[index - 1]
-      let stop = index == totalCount - 1 ? dataCmdStop : 0
-      mmioWrite(base + dataCmdOffset, UInt32(value) | stop)
-      switch waitForTransmitComplete() {
-      case .success: break
-      case .failure(let error): return .failure(error)
-      }
-    }
-
-    guard waitForStop() else { return .failure(.timeout) }
-    _ = mmioRead(base + clrStopDetOffset)
-    return .success(())
-  }
-
-  private static func isI2C0Pair(sda: UInt32, scl: UInt32) -> Bool {
-    (sda == 0 && scl == 1) || (sda == 4 && scl == 5) ||
-      (sda == 8 && scl == 9) || (sda == 12 && scl == 13) ||
-      (sda == 16 && scl == 17) || (sda == 20 && scl == 21)
-  }
-
-  private static func waitForDisabled() -> Bool {
-    for _ in 0..<pollLimit where (mmioRead(base + enableStatusOffset) & 1) == 0 { return true }
-    return false
-  }
-
-  private static func selectTarget(_ address: UInt8) -> Bool {
-    mmioWrite(base + enableOffset, 0)
-    guard waitForDisabled() else { return false }
-    mmioWrite(base + tarOffset, UInt32(address))
-    mmioWrite(base + enableOffset, 1)
-    return true
-  }
-
-  private static func waitForTransmitComplete() -> Result<Void, Error> {
-    for _ in 0..<pollLimit {
-      let interrupts = mmioRead(base + rawIntrStatOffset)
-      if (interrupts & rawInterruptTransmitAbort) != 0 { return .failure(readAndClearAbort()) }
-      if (interrupts & rawInterruptTransmitEmpty) != 0 { return .success(()) }
-    }
-    return .failure(.timeout)
-  }
-
-  private static func waitForStop() -> Bool {
-    for _ in 0..<pollLimit {
-      let interrupts = mmioRead(base + rawIntrStatOffset)
-      if (interrupts & rawInterruptTransmitAbort) != 0 { return false }
-      if (interrupts & rawInterruptStopDetected) != 0 { return true }
-    }
-    return false
-  }
-
-  private static func readAndClearAbort() -> Error {
-    let abortSource = mmioRead(base + txAbrtSourceOffset)
-    _ = mmioRead(base + clrTxAbrtOffset)
-    return .aborted(abortSource)
-  }
-
-  private static func clearInterruptState() {
-    _ = mmioRead(base + clrTxAbrtOffset)
-    _ = mmioRead(base + clrStopDetOffset)
-    while mmioRead(base + txFlrOffset) != 0 {}
-  }
 }
 EOF
 
@@ -1027,8 +562,6 @@ enum RP2040GPIO {
 
     private static let resetIOBank0Bit: UInt32 = 1 << 5
     private static let resetPadsBank0Bit: UInt32 = 1 << 8
-    private static let padPUEBit: UInt32 = 1 << 3
-    private static let padPDEBit: UInt32 = 1 << 2
 
     @inline(__always)
     private static func ioGPIOCtrlAddress(pin: UInt32) -> UInt32 {
@@ -1038,22 +571,6 @@ enum RP2040GPIO {
     @inline(__always)
     private static func padsGPIOAddress(pin: UInt32) -> UInt32 {
         padsBank0Base + 0x004 + (pin * 4)
-    }
-
-    static func setFunction(pin: UInt32, funcSel: UInt32) {
-      mmioWrite(ioGPIOCtrlAddress(pin: pin), funcSel)
-    }
-
-    static func enablePadPullUp(pin: UInt32) {
-      let resetMask = resetIOBank0Bit | resetPadsBank0Bit
-      mmioClearBits(resetsBase + resetsResetOffset, resetMask)
-      while (mmioRead(resetsBase + resetsResetDoneOffset) & resetMask) != resetMask {}
-
-      let padAddress = padsGPIOAddress(pin: pin)
-      var value = mmioRead(padAddress)
-      value |= padPUEBit
-      value &= ~padPDEBit
-      mmioWrite(padAddress, value)
     }
 
     static func configureAsSIOOutput(pin: UInt32) {
@@ -1413,9 +930,9 @@ Generated Swift 6 Embedded starter for Raspberry Pi Pico (RP2040).
 
 ## Included
 
-- Modular source layout (`Sources/Application`, `Sources/BoardSupport`, `Sources/Display`, `Sources/Graphics`, `Sources/Hardware`)
+- Modular source layout (`Sources/Application`, `Sources/BoardSupport`, `Sources/Hardware`)
 - Pico C-SDK integration through CMake
-- SSD1306 128x64 OLED demonstration with an I2C0 transport and one-bit graphics canvas
+- MMIO-based onboard LED blink sample
 - `Scripts/init.sh` for toolchain + SDK setup
 - `Scripts/run.sh` for build, UF2 conversion, and optional flashing
 
@@ -1445,29 +962,11 @@ Generated Swift 6 Embedded starter for Raspberry Pi Pico (RP2040).
    Scripts/run.sh --no-flash
    ```
 
-  ## SSD1306 OLED
-
-  The generated firmware displays a basic graphics demonstration on a four-pin
-  128x64 SSD1306 module. Connect the display as follows:
-
-  | OLED pin | Raspberry Pi Pico pin |
-  | --- | --- |
-  | VCC | 3V3(OUT) |
-  | GND | GND |
-  | SDA | GP4 |
-  | SCL | GP5 |
-
-  The driver tries I2C addresses `0x3C` and `0x3D`. Its defaults are in
-  `Sources/BoardSupport/PicoSSD1306.swift`. The generated I2C transport uses
-  I2C0, so valid alternate pairs are GP0/GP1, GP4/GP5, GP8/GP9, GP12/GP13,
-  GP16/GP17, and GP20/GP21.
-
 ## Customization points
 
 - Change target binary name in `CMakeLists.txt` and `Scripts/run.sh`.
-  - Keep display address and I2C0 wiring in `Sources/BoardSupport/PicoSSD1306.swift`.
-  - Extend `Sources/Graphics/SwiftGFX.swift` or add display drivers in `Sources/Display`.
-  - Add drivers in `Sources/Hardware` (`UART`, additional I2C buses, `SPI`).
+- Add drivers in `Sources/Hardware` (`UART`, `I2C`, `SPI`).
+- Keep board-specific pin mapping in `Sources/BoardSupport`.
 - Add future Swift Embedded dependencies in `Package.swift`.
 
 ## Notes
