@@ -59,6 +59,10 @@ enum RP2040GPIO {
   /// Writing this to a pin's CTRL register selects the CPU-controlled mode.
   private static let funcSelSIO: UInt32 = 0x5
 
+  /// Function select value for the RP2040's I2C peripheral.
+  /// This is the Swift Embedded equivalent of the Pico SDK's `GPIO_FUNC_I2C`.
+  private static let funcSelI2C1: UInt32 = 0x3
+
   /// Reset bit mask for IO_BANK0.
   /// Used when requesting or checking reset state for IO_BANK0.
   private static let resetIOBank0Bit: UInt32 = 1 << 5
@@ -93,6 +97,22 @@ enum RP2040GPIO {
   ///   - funcSel: Function select value from the datasheet (e.g., 0=SIO, 2=PWM)
   static func setFunction(pin: UInt32, funcSel: UInt32) {
     mmioWrite(ioGPIOCtrlAddress(pin: pin), funcSel)
+  }
+
+  /// Configure a GPIO pin for the RP2040 I2C1 peripheral.
+  ///
+  /// This is the Swift Embedded equivalent of the Pico SDK calls:
+  /// `gpio_set_function(pin, GPIO_FUNC_I2C)` and, when enabled,
+  /// `gpio_pull_up(pin)` for the I2C1 pin-mux path.
+  ///
+  /// - Parameters:
+  ///   - pin: GPIO pin number to route to the I2C1 peripheral.
+  ///   - enablePullUp: Whether to enable the internal pull-up resistor.
+  static func configureAsI2C1(pin: UInt32, enablePullUp: Bool = true) {
+    if enablePullUp {
+      enablePadPullUp(pin: pin)
+    }
+    setFunction(pin: pin, funcSel: funcSelI2C1)
   }
 
   /// Compute the address of the pad control register for `pin`.

@@ -17,7 +17,7 @@ class Sample {
 
   // MARK: - Sample -
 
-  /// Runs the sample
+  /// Runs the sample, which demonstrates rotary encoder input, traffic light output, and SSD1306 display rendering.
   func run() -> Never {
     // Display wiring
     RP2040GPIO.configureAsSIOInput(pin: dtPin)
