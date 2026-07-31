@@ -19,7 +19,7 @@ private func rp2040MMIOWrite(_ address: UInt32, _ value: UInt32)
 /// - Parameter address: The 32-bit memory address of the register to read.
 /// - Returns: The 32-bit value read from `address`.
 func mmioRead(_ address: UInt32) -> UInt32 {
-    rp2040MMIORead(address)
+  rp2040MMIORead(address)
 }
 
 @inline(__always)
@@ -29,7 +29,7 @@ func mmioRead(_ address: UInt32) -> UInt32 {
 ///   - address: The 32-bit memory address of the register to write.
 ///   - value: The 32-bit value to write to `address`.
 func mmioWrite(_ address: UInt32, _ value: UInt32) {
-    rp2040MMIOWrite(address, value)
+  rp2040MMIOWrite(address, value)
 }
 
 @inline(__always)
@@ -42,8 +42,8 @@ func mmioWrite(_ address: UInt32, _ value: UInt32) {
 ///   - address: The 32-bit memory address of the register.
 ///   - mask: Bitmask of bits to set to 1. Bits set in `mask` will be set in the register.
 func mmioSetBits(_ address: UInt32, _ mask: UInt32) {
-    let current = mmioRead(address)
-    mmioWrite(address, current | mask)
+  let current = mmioRead(address)
+  mmioWrite(address, current | mask)
 }
 
 @inline(__always)
@@ -56,6 +56,6 @@ func mmioSetBits(_ address: UInt32, _ mask: UInt32) {
 ///   - address: The 32-bit memory address of the register.
 ///   - mask: Bitmask of bits to clear (set to 0). Bits set in `mask` will be cleared in the register.
 func mmioClearBits(_ address: UInt32, _ mask: UInt32) {
-    let current = mmioRead(address)
-    mmioWrite(address, current & ~mask)
+  let current = mmioRead(address)
+  mmioWrite(address, current & ~mask)
 }
