@@ -248,7 +248,7 @@ struct SSD1306Renderer {
     }
 
     display.drawRect(x: 2, y: 20, width: 12, height: 33)
-    display.drawLine(x0: 8, y0: 45, x1: 8, y1: 62)
+    display.drawLine(x0: 8, y0: 55, x1: 8, y1: 62)
     display.drawRect(x: 4, y: 62, width: 8, height: 2)
   }
 }

@@ -9,9 +9,16 @@ public func swift_main() -> Never {
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
   // blink()
 
-  TrafficLight().run()
+  Sample().run()
 
-  // DisplaySample().run()
+  // 2. Blink a traffic light sequence using GPIO15, GPIO14, and GPIO12.
+  // blinkTrafficLight()
+
+  // 3. Ramp LED brightness using RP2040PWM helpers.
+  // PWMDemo().run()
+
+  // 4. Demonstrate rotary encoder input with a traffic light output.
+  // Sample().run()
 }
 
 // MARK: - Samples -
