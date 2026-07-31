@@ -59,15 +59,17 @@ class Sample {
     while true {
       showCycleIndicator()
 
-      // Wait for rising edge on CLK (blocks).
-      _ = RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutMs: 10_000)
+      // Wait for a clean rising edge on CLK.
+      guard RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutMs: 10_000) else { continue }
 
-      // read DT to determine direction; typical rule: when CLK rises,
-      // if DT!=CLK then direction is one way, otherwise the other.
-      let dtHigh = RP2040GPIO.read(pin: dtPin)
-      let clkHigh = RP2040GPIO.read(pin: clkPin)
+      guard let state = readStableEncoderState() else {
+        pico_delay_ms(50)
+        continue
+      }
 
-      if dtHigh != clkHigh {
+      // Read DT to determine direction; when CLK rises, if DT != CLK then the
+      // encoder moved one direction, otherwise the opposite.
+      if state.dt != state.clk {
         position += 1
       } else {
         position -= 1
@@ -88,6 +90,17 @@ class Sample {
   }
 
   // MARK: - Rendering -
+
+  /// Reads the encoder inputs twice with a short delay to filter out bounce.
+  ///
+  /// - Returns: A stable `(dt, clk)` state if both reads agree, otherwise `nil`.
+  private func readStableEncoderState() -> (dt: Bool, clk: Bool)? {
+    let first = (RP2040GPIO.read(pin: dtPin), RP2040GPIO.read(pin: clkPin))
+    pico_delay_ms(2)
+    let second = (RP2040GPIO.read(pin: dtPin), RP2040GPIO.read(pin: clkPin))
+
+    return first == second ? (dt: first.0, clk: first.1) : nil
+  }
 
   /// Triggeres a new render cycle for the display
   ///
