@@ -25,10 +25,8 @@ let package = Package(
       path: "Sources",
       sources: [
         "Application",
-        "BoardSupport",
-        "Display",
-        "Graphics",
-        "Hardware",
+        "Board",
+        "Devices",
       ],
       swiftSettings: [
         // Mirrors the CMake Swift Embedded compilation mode for editor builds.
