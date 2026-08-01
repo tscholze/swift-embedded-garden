@@ -19,11 +19,10 @@ class Sample {
 
   /// Runs the sample, which demonstrates rotary encoder input, traffic light output, and SSD1306 display rendering.
   func run() -> Never {
-    // Display wiring
-    RP2040GPIO.configureAsSIOInput(pin: dtPin)
-    RP2040GPIO.enablePadPullUp(pin: dtPin)
-    RP2040GPIO.configureAsSIOInput(pin: clkPin)
-    RP2040GPIO.enablePadPullUp(pin: clkPin)
+    let rotaryButton = RotaryButton(
+      configuration: RotaryButtonConfiguration(dtPin: dtPin, clkPin: clkPin)
+    )
+    rotaryButton.configure()
 
     // Traffc light wiring
     RP2040GPIO.configureAsSIOOutput(pin: ledPin)
@@ -32,10 +31,10 @@ class Sample {
     RP2040GPIO.configureAsSIOOutput(pin: greenPin)
 
     // Configure display driver
-    display = SSD1306Driver()
+    display = SSD1306Driver(configuration: SSD1306Configuration())
     if case .failure = display.initialize() {
       let alternateAddressDisplay = SSD1306Driver(
-        configuration: PicoSSD1306Configuration(i2cAddress: 0x3d)
+        configuration: SSD1306Configuration(i2cAddress: 0x3d)
       )
 
       guard case .success = alternateAddressDisplay.initialize() else {
@@ -59,21 +58,9 @@ class Sample {
     while true {
       showCycleIndicator()
 
-      // Wait for a clean rising edge on CLK.
-      guard RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutMs: 10_000) else { continue }
+      guard let direction = rotaryButton.waitForDirection() else { continue }
 
-      guard let state = readStableEncoderState() else {
-        pico_delay_ms(50)
-        continue
-      }
-
-      // Read DT to determine direction; when CLK rises, if DT != CLK then the
-      // encoder moved one direction, otherwise the opposite.
-      if state.dt != state.clk {
-        position += 1
-      } else {
-        position -= 1
-      }
+      position += direction
 
       // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
       let modulo = ((position % 3) + 3) % 3
@@ -90,17 +77,6 @@ class Sample {
   }
 
   // MARK: - Rendering -
-
-  /// Reads the encoder inputs twice with a short delay to filter out bounce.
-  ///
-  /// - Returns: A stable `(dt, clk)` state if both reads agree, otherwise `nil`.
-  private func readStableEncoderState() -> (dt: Bool, clk: Bool)? {
-    let first = (RP2040GPIO.read(pin: dtPin), RP2040GPIO.read(pin: clkPin))
-    pico_delay_ms(2)
-    let second = (RP2040GPIO.read(pin: dtPin), RP2040GPIO.read(pin: clkPin))
-
-    return first == second ? (dt: first.0, clk: first.1) : nil
-  }
 
   /// Triggeres a new render cycle for the display
   ///

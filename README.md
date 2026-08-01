@@ -3,7 +3,7 @@
 # Swift Embedded Garden for Raspberry Pi Pico (RP2040)
 > This repository is a complete Swift 6 Embedded starter for the Raspberry Pi Pico, including:
 
-- A modular Swift source layout (`Application`, `BoardSupport`, `Hardware`)
+- A modular Swift source layout (`Application`, `Board`, `Devices`)
 - Pico C-SDK integration through CMake
 - A minimal MMIO-based onboard LED blink firmware
 - macOS automation scripts for setup, build, UF2 conversion, and flashing
@@ -74,11 +74,20 @@ The script shows a simple TUI with the most important steps printed.
 ├── Sources/
 │   ├── Application/
 │   │   └── Main.swift           # Blink loop firmware logic
-│   ├── BoardSupport/
-│   │   └── PicoBoard.swift      # Board-level pin mapping
-│   └── Hardware/
-│       ├── MMIO.swift           # Low-level register read/write helpers
-│       └── RP2040GPIO.swift     # RP2040 GPIO driver using MMIO
+│   ├── Board/
+│   │   └── RP2040/
+│   │       ├── MMIO.swift       # Low-level register read/write helpers
+│   │       └── GPIO.swift # RP2040 GPIO driver using MMIO
+│   └── Devices/
+│       ├── SSD1306/
+│       │   ├── SSD1306Driver.swift
+│       │   ├── SSD1306Renderer.swift
+│       │   ├── SSD1306Configuration.swift
+│       │   └── SwiftGFX.swift
+│       └── RotaryButton/
+│           ├── RotaryButton.swift
+│           ├── RotaryButtonController.swift
+│           └── RotaryButtonConfiguration.swift
 ├── CMakeLists.txt               # Firmware build orchestration
 └── Package.swift                # Swift package metadata for future dependencies
 ```
@@ -167,13 +176,13 @@ the SSD1306 display-off and full initialization command sequence instead.
 
 ### Module Boundaries
 
-- `Sources/Hardware/RP2040I2C.swift` configures I2C0 by direct register access.
+- `Sources/Board/RP2040/I2C.swift` configures I2C0 by direct register access.
   Its register timing and blocking write behavior are a Swift transform of the
   Pico SDK `hardware_i2c` implementation.
-- `Sources/Graphics/SwiftGFX.swift` owns the display-independent one-bit
+- `Sources/Devices/SSD1306/SwiftGFX.swift` owns the display-independent one-bit
   framebuffer and raster primitives. Its compact font uses the classic 5x7
   column format compatible with the bundled Adafruit_GFX font.
-- `Sources/Display/SSD1306Driver.swift` implements the SSD1306 command/data
+- `Sources/Devices/SSD1306/SSD1306Driver.swift` implements the SSD1306 command/data
   protocol. Its initialization order is a Swift transform of the SSD1306
   datasheet and conventional Adafruit_SSD1306 setup flow.
 
@@ -184,17 +193,16 @@ updated image to the OLED.
 
 Recommended layering:
 
-1. **Hardware layer (`Sources/Hardware`)**
-   Add protocol-specific register definitions and primitives:
-   - `RP2040UART.swift`
-   - `RP2040I2C.swift`
-   - `RP2040SPI.swift`
+1. **Board layer (`Sources/Board`)**
+   Add board-specific register definitions and primitives here:
+   - `I2C.swift`
+   - `GPIO.swift`
+   - `PWM.swift`
 
-2. **Board support layer (`Sources/BoardSupport`)**
-   Keep board-dependent pin mux and wiring decisions here:
-   - UART TX/RX pins
-   - I2C SDA/SCL pins
-   - SPI SCK/MOSI/MISO/CS pins
+2. **Device layer (`Sources/Devices`)**
+   Keep hardware-specific drivers and their local helpers here:
+   - `SSD1306/`
+   - `RotaryButton/`
 
 3. **Application layer (`Sources/Application`)**
    Use high-level driver calls without direct register addresses.

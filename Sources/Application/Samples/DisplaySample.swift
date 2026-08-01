@@ -12,10 +12,10 @@ struct DisplaySample {
   /// A one-blink LED fault means initialization failed; two blinks means the
   /// display accepted initialization but rejected the framebuffer transfer.
   func run() -> Never {
-    var display = SSD1306Driver()
+    var display = SSD1306Driver(configuration: SSD1306Configuration())
     if case .failure = display.initialize() {
       let alternateAddressDisplay = SSD1306Driver(
-        configuration: PicoSSD1306Configuration(i2cAddress: 0x3d)
+        configuration: SSD1306Configuration(i2cAddress: 0x3d)
       )
 
       guard case .success = alternateAddressDisplay.initialize() else {

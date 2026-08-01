@@ -309,8 +309,8 @@ let package = Package(
             path: "Sources",
             sources: [
                 "Application",
-                "BoardSupport",
-                "Hardware",
+                "Board",
+                "Devices",
             ],
             swiftSettings: [
                 .unsafeFlags([
@@ -349,9 +349,9 @@ pico_sdk_init()
 
 set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/BoardSupport/PicoBoard.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/MMIO.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040GPIO.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/PicoBoard.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
 )
 
 compile_swift_embedded_object(
@@ -506,7 +506,7 @@ public func swift_main() -> Never {
 private func pico_delay_ms(_ ms: UInt32)
 EOF
 
-  emit_template "${OUTPUT_DIR}/Sources/BoardSupport/PicoBoard.swift" <<'EOF'
+  emit_template "${OUTPUT_DIR}/Sources/Board/RP2040/PicoBoard.swift" <<'EOF'
 // Board support mapping for Raspberry Pi Pico.
 
 enum PicoBoard {
@@ -515,7 +515,7 @@ enum PicoBoard {
 }
 EOF
 
-  emit_template "${OUTPUT_DIR}/Sources/Hardware/MMIO.swift" <<'EOF'
+  emit_template "${OUTPUT_DIR}/Sources/Board/RP2040/MMIO.swift" <<'EOF'
 // Minimal MMIO helper layer for Swift Embedded.
 
 @inline(__always)
@@ -541,7 +541,7 @@ func mmioClearBits(_ address: UInt32, _ mask: UInt32) {
 }
 EOF
 
-  emit_template "${OUTPUT_DIR}/Sources/Hardware/RP2040GPIO.swift" <<'EOF'
+  emit_template "${OUTPUT_DIR}/Sources/Board/RP2040/GPIO.swift" <<'EOF'
 // RP2040 GPIO driver using direct MMIO.
 // Extension point: add UART/I2C/SPI setup routines in this layer.
 
@@ -930,7 +930,7 @@ Generated Swift 6 Embedded starter for Raspberry Pi Pico (RP2040).
 
 ## Included
 
-- Modular source layout (`Sources/Application`, `Sources/BoardSupport`, `Sources/Hardware`)
+- Modular source layout (`Sources/Application`, `Sources/Board`, `Sources/Devices`)
 - Pico C-SDK integration through CMake
 - MMIO-based onboard LED blink sample
 - `Scripts/init.sh` for toolchain + SDK setup
@@ -965,8 +965,8 @@ Generated Swift 6 Embedded starter for Raspberry Pi Pico (RP2040).
 ## Customization points
 
 - Change target binary name in `CMakeLists.txt` and `Scripts/run.sh`.
-- Add drivers in `Sources/Hardware` (`UART`, `I2C`, `SPI`).
-- Keep board-specific pin mapping in `Sources/BoardSupport`.
+- Add drivers in `Sources/Devices` (`SSD1306`, `RotaryButton`, etc.).
+- Keep board-specific pin mapping in `Sources/Board`.
 - Add future Swift Embedded dependencies in `Package.swift`.
 
 ## Notes

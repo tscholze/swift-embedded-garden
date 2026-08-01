@@ -34,12 +34,17 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOExample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMDemo.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Display/SSD1306Driver.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Graphics/SwiftGFX.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/MMIO.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040GPIO.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040I2C.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Hardware/RP2040PWM.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Renderer.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Configuration.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SwiftGFX.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButton.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonController.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonConfiguration.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/I2C.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/PWM.swift"
 )
 
 compile_swift_embedded_object(
