@@ -1,5 +1,5 @@
-/// Demonstrates the AZ-Delivery KY-015 DHT11 sensor using GPIO bit-banging.
-struct GPIOSample {
+/// Demonstrates reading values from a DHT11 sensor using GPIO bit-banging.
+struct DHTS11Sample {
   private let ledPin: UInt32 = 25
 
   /// Supported RP2040 wiring choices for the DHT11 data line on a Raspberry Pi Pico.

@@ -6,11 +6,9 @@ class Sample {
   private let dtPin: UInt32 = 14
   private let clkPin: UInt32 = 15
   private let ledPin: UInt32 = 25
-  private let dht11DataPin: UInt32 = 22
   private let redPin: UInt32 = 2
   private let yellowPin: UInt32 = 3
   private let greenPin: UInt32 = 4
-  private let dht11MinimumIntervalMs: UInt32 = 2_000
 
   // MARK: - Display -
 
@@ -52,35 +50,27 @@ class Sample {
     // Match the reference example: let the controller and charge pump settle.
     pico_delay_ms(2_000)
 
-    let dht11 = DHT11(configuration: DHT11Configuration(dataPin: dht11DataPin))
-    dht11.configure()
-
-    display.clear()
-    renderer.drawTitle("DHT11")
-    _ = display.flush()
+    // Draw the initial frame and send it to the display.
+    render(activeLight: .red)
+    var position = 0
 
     while true {
       showCycleIndicator()
 
-      do {
-        let reading = try dht11.read()
-        display.clear()
-        renderer.drawTitle("DHT11")
-        renderer.drawReading(reading)
-      } catch {
-        display.clear()
-        renderer.drawTitle("DHT11")
-        renderer.drawReading(nil)
+      guard let direction = rotaryButton.waitForDirection() else { continue }
+      position += direction
 
-        if case DHT11Error.timeout = error {
-          showRed()
-        } else {
-          showGreen()
-        }
+      // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
+      let modulo = ((position % 3) + 3) % 3
+      switch modulo {
+      case 0: showRed()
+      case 1: showYellow()
+      case 2: showGreen()
+      default: showRed()
       }
 
-      // DHT11 datasheet minimum sampling period is about 1 Hz to 0.5 Hz.
-      pico_delay_ms(dht11MinimumIntervalMs)
+      // small debounce delay
+      pico_delay_ms(250)
     }
   }
 

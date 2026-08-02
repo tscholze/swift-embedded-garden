@@ -85,7 +85,6 @@ struct SSD1306Renderer {
     _ = display.flush()
   }
 }
-}
 
 
 /// A traffic light color used by ``SSD1306Renderer`` to illuminate one of three lights.
