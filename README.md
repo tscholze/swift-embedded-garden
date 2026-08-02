@@ -24,6 +24,7 @@ The repository currently includes a few small beginner-friendly samples under th
 - `GPIOExample` — configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors.
 - `PWMDemo` — configures PWM on the onboard LED and ramps the brightness up and down.
 - `TrafficLight` — demonstrates a simple traffic-light style output sequence and can also use a KY-040 rotary encoder to switch between red, yellow, and green states.
+- `GPIOSample` — reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line.
 
 You can switch which sample runs by updating the entry point in `Sources/Application/Main.swift`.
 
@@ -84,10 +85,13 @@ The script shows a simple TUI with the most important steps printed.
 │       │   ├── SSD1306Renderer.swift
 │       │   ├── SSD1306Configuration.swift
 │       │   └── SwiftGFX.swift
-│       └── RotaryButton/
-│           ├── RotaryButton.swift
-│           ├── RotaryButtonController.swift
-│           └── RotaryButtonConfiguration.swift
+│       ├── RotaryButton/
+│       │   ├── RotaryButton.swift
+│       │   ├── RotaryButtonController.swift
+│       │   └── RotaryButtonConfiguration.swift
+│       └── DHT11/
+│           ├── DHT11.swift
+│           └── DHT11Configuration.swift
 ├── CMakeLists.txt               # Firmware build orchestration
 └── Package.swift                # Swift package metadata for future dependencies
 ```
@@ -189,6 +193,24 @@ the SSD1306 display-off and full initialization command sequence instead.
 Drawing changes only the framebuffer. Call `flush()` after drawing to send the
 updated image to the OLED.
 
+## DHT11 sensor example
+
+The repository now includes a small DHT11 driver and sample for the AZ-Delivery KY-015 module.
+The device is implemented as `DHT11` in `Sources/Devices/DHT11/` and the sample entrypoint is `GPIOSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+Use the sensor with a single data wire plus power and ground:
+
+- Option A: `DHT11 DATA -> GP2`, `VCC -> 3V3(OUT)`, `GND -> GND`
+- Option B: `DHT11 DATA -> GP3`, `VCC -> 3V3(OUT)`, `GND -> GND`
+- Option C: `DHT11 DATA -> GP15`, `VCC -> 3V3(OUT)`, `GND -> GND`
+- Option D: `DHT11 DATA -> GP22`, `VCC -> 3V3(OUT)`, `GND -> GND`
+
+These are the sample options currently documented in `GPIOSample.swift`. On the Raspberry Pi Pico, GP0/GP1 are not recommended because they are used by USB, GP4/GP5 are default I2C pins, and GP6-GP11 are tied to the onboard QSPI flash. GP2 and GP3 are the simplest verified choices from the GP0-GP11 range for this example.
+
+This sensor uses the one-wire DHT11 protocol, so the sample keeps the data line high between reads and pulls it low for the start signal before reading the 40-bit payload.
+
 ## Extending with drivers (GPIO, UART, I2C, SPI)
 
 Recommended layering:
@@ -203,6 +225,7 @@ Recommended layering:
    Keep hardware-specific drivers and their local helpers here:
    - `SSD1306/`
    - `RotaryButton/`
+   - `DHT11/`
 
 3. **Application layer (`Sources/Application`)**
    Use high-level driver calls without direct register addresses.

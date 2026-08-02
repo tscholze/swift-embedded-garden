@@ -1,7 +1,7 @@
 /// Firmware entry point selected by the C bootstrap.
 ///
 /// Switch the invoked sample to select a different firmware demonstration.
-/// The current default is the hardware-validated SSD1306 I2C display sample.
+/// The current default is the rotary/SSD1306 sample.
 
 @_cdecl("swift_main")
 public func swift_main() -> Never {
@@ -19,6 +19,9 @@ public func swift_main() -> Never {
 
   // 4. Demonstrate rotary encoder input with a traffic light output.
   // Sample().run()
+
+  // 5. Read temperature and humidity from a KY-015 DHT11 sensor.
+  // GPIOSample().run()
 }
 
 // MARK: - Samples -
@@ -70,3 +73,7 @@ private func blinkTrafficLight() -> Never {
 /// Imports the Pico SDK-backed millisecond delay from the C bootstrap.
 @_silgen_name("pico_delay_ms")
 func pico_delay_ms(_ ms: UInt32)
+
+/// Imports the Pico SDK-backed microsecond delay from the C bootstrap.
+@_silgen_name("pico_delay_us")
+func pico_delay_us(_ us: UInt32)

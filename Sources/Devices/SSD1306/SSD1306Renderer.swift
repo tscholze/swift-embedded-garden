@@ -47,7 +47,46 @@ struct SSD1306Renderer {
     display.drawLine(x0: 8, y0: 55, x1: 8, y1: 62)
     display.drawRect(x: 4, y: 62, width: 8, height: 2)
   }
+
+  /// Draws the latest DHT11 sensor reading into the current framebuffer.
+  ///
+  /// - Parameter reading: The sensor sample to render, if available.
+  func drawReading(_ reading: DHT11Reading?) {
+    display.setCursor(x: 4, y: 24)
+
+    if let reading {
+      display.drawText("Temperature - \(reading.temperatureC)C")
+      display.setCursor(x: 4, y: 38)
+      display.drawText("Humidity    - \(reading.humidityPercent)P")
+    } else {
+      display.setCursor(x: 4, y: 38)
+      display.drawText("No reading", color: .on)
+    }
+
+    _ = display.flush()
+  }
+
+  /// Draws the latest DHT11 sensor reading in a shorten representation
+  /// into the current framebuffer.
+  ///
+  /// - Parameter reading: The sensor sample to render, if available.
+  func drawReadingShort(_ reading: DHT11Reading?) {
+    display.setCursor(x: 4, y: 24)
+
+    if let reading {
+      display.drawText("T - \(reading.temperatureC)C")
+      display.setCursor(x: 4, y: 38)
+      display.drawText("H - \(reading.humidityPercent)P")
+    } else {
+      display.setCursor(x: 4, y: 38)
+      display.drawText("NA", color: .on)
+    }
+
+    _ = display.flush()
+  }
 }
+}
+
 
 /// A traffic light color used by ``SSD1306Renderer`` to illuminate one of three lights.
 enum TrafficLightColor: Int {
