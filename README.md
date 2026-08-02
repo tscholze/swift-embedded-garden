@@ -297,6 +297,13 @@ back to a simple blink so you still get visible feedback.
 - The 'Embedded' section on the [Swift Forum](https://forums.swift.org/c/platform/embedded/107)
 - More or less good working GitHub Copilot
 
+## Formatting
+
+Currently there is no special formatting, before commiting it should be formatted via:
+```bash
+ find . -name "*.swift" -not -path "./.build/*" -print0 | xargs -0 swift format format --in-place
+ ```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
