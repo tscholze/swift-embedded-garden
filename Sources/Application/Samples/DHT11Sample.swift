@@ -1,24 +1,20 @@
 /// Demonstrates reading values from a DHT11 sensor using GPIO bit-banging.
 struct DHTS11Sample {
-  private let ledPin: UInt32 = 25
+  // MARK: - GPIO Pin Assignments -
 
-  /// Supported RP2040 wiring choices for the DHT11 data line on a Raspberry Pi Pico.
-  ///
-  /// Verified safe choices in this sample are GP2 and GP3 because they are not
-  /// assigned to the Pico board's default UART, I2C, SPI, or QSPI flash pins.
-  /// GP15 and GP22 are also valid examples if you want to keep the data wire on
-  /// the board's more commonly used breakout positions.
-  private let configurations: [DHT11Configuration] = [
-    DHT11Configuration(dataPin: 21, label: "GP21")
-  ]
+  private let ledPin: UInt32 = 25
+  private let sensor: DHT11
+
+  // MARK - Initialization -
+
+  init(configuration: DHT11Configuration) {
+    sensor = DHT11(configuration: configuration)
+    sensor.configure()
+  }
+
+  // MARK: - Sample run -
 
   func run() -> Never {
-    let sensorConfiguration = configurations[0]
-    let sensor = DHT11(configuration: sensorConfiguration)
-
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
-    sensor.configure()
-
     while true {
       do {
         let reading = try sensor.read()
@@ -30,6 +26,20 @@ struct DHTS11Sample {
       pico_delay_ms(2_000)
     }
   }
+
+  // MARK: - Helper -
+
+  /// Tries to read a sample from the DHT11 sensor.
+  ///
+  /// **Caution**
+  /// Between each reading should be a cooldown the callee must implement.
+  ///
+  /// - Returns: Found value on success, or `nil` if the reading failed.
+  func readSensor() -> DHT11Reading? {
+    return try? sensor.read()
+  }
+
+  // MARK: - Private helpers -
 
   private func showSuccess(reading: DHT11Reading) {
     RP2040GPIO.setHigh(pin: ledPin)

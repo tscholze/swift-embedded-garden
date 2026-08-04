@@ -3,20 +3,25 @@
 struct TrafficLight {
   // MARK: - GPIO Pin Assignments -
 
-  private let ledPin: UInt32 = 25
-  private let redPin: UInt32 = 2
-  private let yellowPin: UInt32 = 3
-  private let greenPin: UInt32 = 4
+  private let ledPin: UInt32
+  private let redPin: UInt32
+  private let yellowPin: UInt32
+  private let greenPin: UInt32
+
+  // MARK: - Initialization -
+
+  init(configuration: TrafficLightConfiguration) {
+    self.ledPin = 25
+    self.redPin = configuration.redPin
+    self.yellowPin = configuration.yellowPin
+    self.greenPin = configuration.greenPin
+
+    configure()
+  }
 
   // MARK: - Sample -
 
   func run() -> Never {
-    // Apply configurations for reused pins.
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
-    RP2040GPIO.configureAsSIOOutput(pin: redPin)
-    RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
-    RP2040GPIO.configureAsSIOOutput(pin: greenPin)
-
     blinkSequence()
   }
 
@@ -99,30 +104,44 @@ struct TrafficLight {
 
   /// Show a brief indicator on the onboard LED to
   /// signal a cycle change.
-  private func showCycleIndicator() {
+  func showCycleIndicator() {
     RP2040GPIO.setHigh(pin: ledPin)
     pico_delay_ms(250)
     RP2040GPIO.setLow(pin: ledPin)
   }
 
   /// Show the red light on, and turn off yellow and green lights.
-  private func showRed() {
+  func showRed() {
     RP2040GPIO.setHigh(pin: redPin)
     RP2040GPIO.setLow(pin: yellowPin)
     RP2040GPIO.setLow(pin: greenPin)
   }
 
   /// Show the yellow light on, and turn off red and green lights.
-  private func showYellow() {
+  func showYellow() {
     RP2040GPIO.setLow(pin: redPin)
     RP2040GPIO.setHigh(pin: yellowPin)
     RP2040GPIO.setLow(pin: greenPin)
   }
 
   /// Show the green light on, and turn off red and yellow lights.
-  private func showGreen() {
+  func showGreen() {
     RP2040GPIO.setLow(pin: redPin)
     RP2040GPIO.setLow(pin: yellowPin)
     RP2040GPIO.setHigh(pin: greenPin)
   }
+
+  // MARK: - Private helpers -
+
+  private func configure() {
+    RP2040GPIO.configureAsSIOOutput(pin: redPin)
+    RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
+    RP2040GPIO.configureAsSIOOutput(pin: greenPin)
+  }
+}
+
+struct TrafficLightConfiguration {
+  let redPin: UInt32
+  let yellowPin: UInt32
+  let greenPin: UInt32
 }

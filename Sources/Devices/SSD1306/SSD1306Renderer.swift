@@ -37,7 +37,7 @@ struct SSD1306Renderer {
     for (index, light) in lights.enumerated() {
       let isActive = index == activeLight.rawValue
       if isActive {
-        display.fillCircle(x: light.x, y: light.y, radius: radius)
+        display.fillCircle(x: light.x, y: light.y, radius: radius, color: .invert)
       } else {
         display.drawCircle(x: light.x, y: light.y, radius: radius)
       }
@@ -100,4 +100,6 @@ enum TrafficLightColor: Int {
   case yellow = 1
   /// Green light, the third in the traffic light sequence.
   case green = 2
+  /// No light illuminated, the fourth in the traffic light sequence.
+  case off = 3
 }
