@@ -5,10 +5,6 @@ struct RotaryButton {
   /// Creates a rotary-button wrapper from configuration.
   init(configuration: RotaryButtonConfiguration) {
     self.controller = RotaryButtonController(configuration: configuration)
-  }
-
-  /// Configures the underlying pins.
-  func configure() {
     controller.configure()
   }
 

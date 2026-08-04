@@ -5,15 +5,14 @@ struct DHT11 {
   /// Configuration for the DHT11 sensor.
   let configuration: DHT11Configuration
 
-  // MARK: - Internal helper -
+  // MARK: - Initialization -
 
-  /// Configures the data pin for the DHT11 bus.
-  func configure() {
-    RP2040GPIO.configureAsSIOOutput(pin: configuration.dataPin)
-    RP2040GPIO.setHigh(pin: configuration.dataPin)
-    RP2040GPIO.enablePadPullUp(pin: configuration.dataPin)
-    pico_delay_ms(250)
+  init(configuration: DHT11Configuration) {
+    self.configuration = configuration
+    configure()
   }
+
+  // MARK: - Internal helper -
 
   /// Reads a single temperature and humidity sample from the sensor.
   func read() throws -> DHT11Reading {
@@ -31,6 +30,14 @@ struct DHT11 {
   }
 
   // MARK: - Private helper -
+
+  /// Configures the data pin for the DHT11 bus.
+  func configure() {
+    RP2040GPIO.configureAsSIOOutput(pin: configuration.dataPin)
+    RP2040GPIO.setHigh(pin: configuration.dataPin)
+    RP2040GPIO.enablePadPullUp(pin: configuration.dataPin)
+    pico_delay_ms(250)
+  }
 
   /// Executes one full DHT11 transfer transaction.
   private func readTransaction() throws -> DHT11Reading {

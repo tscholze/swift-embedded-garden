@@ -21,8 +21,8 @@ If you are looking for the single-file-based generator to setup your own Swift e
 
 The repository currently includes a few small beginner-friendly samples under the application layer:
 
-- `GPIOExample` — configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors.
-- `PWMDemo` — configures PWM on the onboard LED and ramps the brightness up and down.
+- `GPIOSample` — configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors.
+- `PWMSample` — configures PWM on the onboard LED and ramps the brightness up and down.
 - `TrafficLight` — demonstrates a simple traffic-light style output sequence and can also use a KY-040 rotary encoder to switch between red, yellow, and green states.
 - `GPIOSample` — reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line.
 

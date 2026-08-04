@@ -1,6 +1,6 @@
 // PWM demo: Ramp LED brightness using RP2040PWM helpers.
 
-struct PWMDemo {
+struct PWMSample {
   private let ledPin: UInt32 = 25
 
   func run() -> Never {
