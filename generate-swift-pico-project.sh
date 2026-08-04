@@ -335,8 +335,8 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/Sample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLight.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOExample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMDemo.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Renderer.swift"
@@ -488,16 +488,16 @@ struct Sample {
 }
 TEMPLATE_SAMPLE
 
-  emit_template "${OUTPUT_DIR}/Sources/Application/Samples/GPIOExample.swift" <<'TEMPLATE_GPIO_SAMPLE'
-struct GPIOExample {
+  emit_template "${OUTPUT_DIR}/Sources/Application/Samples/GPIOSample.swift" <<'TEMPLATE_GPIO_SAMPLE'
+struct GPIOSample {
   func run() {
     print("GPIO example")
   }
 }
 TEMPLATE_GPIO_SAMPLE
 
-  emit_template "${OUTPUT_DIR}/Sources/Application/Samples/PWMDemo.swift" <<'TEMPLATE_PWM_SAMPLE'
-struct PWMDemo {
+  emit_template "${OUTPUT_DIR}/Sources/Application/Samples/PWMSample.swift" <<'TEMPLATE_PWM_SAMPLE'
+struct PWMSample {
   func run() {
     print("PWM demo")
   }

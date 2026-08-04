@@ -30,11 +30,13 @@ pico_sdk_init()
 set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/Sample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLight.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOExample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMDemo.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLightSample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DHT11Sample.swift"
+
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/TrafficLight/TrafficLight.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Renderer.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Configuration.swift"
@@ -44,6 +46,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonConfiguration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11Configuration.swift"
+
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/I2C.swift"
