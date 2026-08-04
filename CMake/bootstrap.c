@@ -30,6 +30,10 @@ void pico_delay_ms(uint32_t ms) {
   sleep_ms(ms);
 }
 
+void pico_delay_us(uint32_t us) {
+  sleep_us(us);
+}
+
 // Swift's raw-pointer loads and stores are not volatile. These functions retain
 // the required volatile MMIO semantics while keeping register maps in Swift.
 uint32_t rp2040_mmio_read(uint32_t address) {

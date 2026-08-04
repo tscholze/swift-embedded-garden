@@ -47,6 +47,49 @@ struct SSD1306Renderer {
     display.drawLine(x0: 8, y0: 55, x1: 8, y1: 62)
     display.drawRect(x: 4, y: 62, width: 8, height: 2)
   }
+
+  /// Draws the latest DHT11 sensor reading into the current framebuffer.
+  ///
+  /// - Parameters:
+  ///   - reading: The sensor sample to render, if available.
+  ///   - shiftX: Horizontal shift for the rendering position.
+  ///   - shiftY: Vertical shift for the rendering position.
+  func drawReading(_ reading: DHT11Reading?, shiftX: Int = 0, shiftY: Int = 0) {
+    display.setCursor(x: 4 + shiftX, y: 24 + shiftY)
+
+    if let reading {
+      display.drawText("Temperature - \(reading.temperatureC)C")
+      display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
+      display.drawText("Humidity    - \(reading.humidityPercent)P")
+    } else {
+      display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
+      display.drawText("No reading", color: .on)
+    }
+
+    _ = display.flush()
+  }
+
+  /// Draws the latest DHT11 sensor reading in a shorten representation
+  /// into the current framebuffer.
+  ///
+  /// - Parameters:
+  ///   - reading: The sensor sample to render, if available.
+  ///   - shiftX: Horizontal shift for the rendering position.
+  ///   - shiftY: Vertical shift for the rendering position.
+  func drawReadingShort(_ reading: DHT11Reading?, shiftX: Int = 0, shiftY: Int = 0) {
+    display.setCursor(x: 4 + shiftX, y: 24 + shiftY)
+
+    if let reading {
+      display.drawText("T - \(reading.temperatureC)C")
+      display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
+      display.drawText("H - \(reading.humidityPercent)P")
+    } else {
+      display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
+      display.drawText("NA", color: .on)
+    }
+
+    _ = display.flush()
+  }
 }
 
 /// A traffic light color used by ``SSD1306Renderer`` to illuminate one of three lights.

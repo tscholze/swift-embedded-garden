@@ -251,6 +251,34 @@ enum RP2040GPIO {
     return (v & (1 << pin)) != 0
   }
 
+  /// Read an 8-bit value from a digital pin using a simple pulse-width encoding.
+  ///
+  /// This helper is useful for 1-wire-style sensors such as DHT11 that encode
+  /// each bit as a low pulse followed by a longer high pulse.
+  static func readByte(pin: UInt32, timeoutMs: UInt32 = 100) -> UInt8? {
+    var value: UInt8 = 0
+
+    for _ in 0..<8 {
+      guard waitForLow(pin: pin, timeoutMs: timeoutMs) else { return nil }
+
+      var duration: UInt32 = 0
+      while read(pin: pin) {
+        pico_delay_us(1)
+        duration += 1
+        if duration >= 100_000 { return nil }
+      }
+
+      value <<= 1
+      if duration > 40 {
+        value |= 1
+      }
+
+      guard waitForHigh(pin: pin, timeoutMs: timeoutMs) else { return nil }
+    }
+
+    return value
+  }
+
   /// Atomically toggle the output state of a GPIO pin.
   ///
   /// - Parameter pin: GPIO pin number to toggle.

@@ -52,14 +52,12 @@ class Sample {
 
     // Draw the initial frame and send it to the display.
     render(activeLight: .red)
-
     var position = 0
 
     while true {
       showCycleIndicator()
 
       guard let direction = rotaryButton.waitForDirection() else { continue }
-
       position += direction
 
       // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
