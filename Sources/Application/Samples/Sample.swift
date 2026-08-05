@@ -3,55 +3,49 @@
 class Sample {
   // MARK: - Pin Assignments -
 
-  private let dtPin: UInt32 = 14
-  private let clkPin: UInt32 = 15
-  private let ledPin: UInt32 = 25
-  private let redPin: UInt32 = 2
-  private let yellowPin: UInt32 = 3
-  private let greenPin: UInt32 = 4
+  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15)
+  private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
+  private let dht11c = DHT11Configuration(dataPin: 22)
+  private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
 
-  // MARK: - Display -
+  // MARK: - Peripherals -
 
   private var renderer: SSD1306Renderer!
   private var display: SSD1306Driver!
+  private var trafficLight: TrafficLight!
 
   // MARK: - Sample -
 
-  /// Runs the sample, which demonstrates rotary encoder input, traffic light output, and SSD1306 display rendering.
+  /// Runs the sample, which demonstrates rotary encoder input,
+  ///  traffic light output, and SSD1306 display rendering.
   func run() -> Never {
-    let rotaryButton = RotaryButton(
-      configuration: RotaryButtonConfiguration(dtPin: dtPin, clkPin: clkPin)
-    )
-    rotaryButton.configure()
+    // Setup DHT11 sensor
+    let dht11Sensor = DHT11(configuration: dht11c)
 
-    // Traffc light wiring
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
-    RP2040GPIO.configureAsSIOOutput(pin: redPin)
-    RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
-    RP2040GPIO.configureAsSIOOutput(pin: greenPin)
+    // Setup traffic light
+    trafficLight = TrafficLight(configuration: tlc)
 
-    // Configure display driver
-    display = SSD1306Driver(configuration: SSD1306Configuration())
+    // Setup rotary button
+    let rotaryButton = RotaryButton(configuration: rbc)
+
+    // Setup display
+    display = SSD1306Driver(configuration: ssd1306c)
+
+    // Initialize the display and check for errors.
+    // If initialization fails, enter a fault loop.
     if case .failure = display.initialize() {
-      let alternateAddressDisplay = SSD1306Driver(
-        configuration: SSD1306Configuration(i2cAddress: 0x3d)
-      )
-
-      guard case .success = alternateAddressDisplay.initialize() else {
-        displayFaultLoop(blinks: 4)
-      }
-
-      display = alternateAddressDisplay
+      displayFaultLoop(blinks: 1)
     }
 
     // Configure renderer
     renderer = SSD1306Renderer(display: display)
 
-    // Match the reference example: let the controller and charge pump settle.
+    // Wait that everything is ready before starting the main loop.
     pico_delay_ms(2_000)
 
     // Draw the initial frame and send it to the display.
-    render(activeLight: .red)
+    render(activeLight: .off, reading: try? dht11Sensor.read())
+
     var position = 0
 
     while true {
@@ -60,13 +54,20 @@ class Sample {
       guard let direction = rotaryButton.waitForDirection() else { continue }
       position += direction
 
+      var reading: DHT11Reading? = nil
+      do {
+        reading = try dht11Sensor.read()
+      } catch {
+        displayFaultLoop(blinks: 3)
+      }
+
       // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
       let modulo = ((position % 3) + 3) % 3
       switch modulo {
-      case 0: showRed()
-      case 1: showYellow()
-      case 2: showGreen()
-      default: showRed()
+      case 0: showRed(reading: reading)
+      case 1: showYellow(reading: reading)
+      case 2: showGreen(reading: reading)
+      default: showRed(reading: reading)
       }
 
       // small debounce delay
@@ -79,10 +80,14 @@ class Sample {
   /// Triggeres a new render cycle for the display
   ///
   /// - Parameter activeLight: The light to illuminate.
-  private func render(activeLight: TrafficLightColor) {
+  private func render(activeLight: TrafficLightColor, reading: DHT11Reading? = nil) {
     display.clear()
-    renderer.drawTitle("Hello Swift Embedded")
+    renderer.drawTitle("Swift Embedded Garden")
     renderer.drawTrafficLight(activeLight: activeLight)
+
+    if let reading {
+      renderer.drawReadingShort(reading, shiftX: 30, shiftY: 4)
+    }
 
     guard case .success = display.flush() else {
       displayFaultLoop(blinks: 2)
@@ -94,36 +99,27 @@ class Sample {
   /// Show a brief indicator on the onboard LED to
   /// signal a cycle change.
   private func showCycleIndicator() {
-    RP2040GPIO.setHigh(pin: ledPin)
+    RP2040GPIO.setHigh(pin: 25)
     pico_delay_ms(100)
-    RP2040GPIO.setLow(pin: ledPin)
+    RP2040GPIO.setLow(pin: 25)
   }
 
   /// Show the red light on, and turn off yellow and green lights.
-  private func showRed() {
-    RP2040GPIO.setHigh(pin: redPin)
-    RP2040GPIO.setLow(pin: yellowPin)
-    RP2040GPIO.setLow(pin: greenPin)
-
-    render(activeLight: .red)
+  private func showRed(reading: DHT11Reading? = nil) {
+    trafficLight.showRed()
+    render(activeLight: .red, reading: reading)
   }
 
   /// Show the yellow light on, and turn off red and green lights.
-  private func showYellow() {
-    RP2040GPIO.setLow(pin: redPin)
-    RP2040GPIO.setHigh(pin: yellowPin)
-    RP2040GPIO.setLow(pin: greenPin)
-
-    render(activeLight: .yellow)
+  private func showYellow(reading: DHT11Reading? = nil) {
+    trafficLight.showYellow()
+    render(activeLight: .yellow, reading: reading)
   }
 
   /// Show the green light on, and turn off red and yellow lights.
-  private func showGreen() {
-    RP2040GPIO.setLow(pin: redPin)
-    RP2040GPIO.setLow(pin: yellowPin)
-    RP2040GPIO.setHigh(pin: greenPin)
-
-    render(activeLight: .green)
+  private func showGreen(reading: DHT11Reading? = nil) {
+    trafficLight.showGreen()
+    render(activeLight: .green, reading: reading)
   }
 
   /// Signals a display failure on the Pico onboard LED without requiring UART.

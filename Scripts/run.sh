@@ -287,7 +287,7 @@ main() {
     # Copy UF2 to the Pico.
     flash_uf2
     # Success message for build + flash path.
-    log "Success. The Pico should now run the Swift blink firmware."
+    log "Success. The Pico should now run the Swift Embedded firmware."
   else
     # Success message for build-only path.
     log "Build finished. Flash was skipped because --no-flash was used."

@@ -15,7 +15,7 @@ public func swift_main() -> Never {
   // blinkTrafficLight()
 
   // 3. Ramp LED brightness using RP2040PWM helpers.
-  // PWMDemo().run()
+  // PWMSample().run()
 
   // 4. Demonstrate rotary encoder input with a traffic light output.
   // Sample().run()
