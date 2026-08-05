@@ -58,9 +58,11 @@ struct SSD1306Renderer {
     display.setCursor(x: 4 + shiftX, y: 24 + shiftY)
 
     if let reading {
-      display.drawText("Temperature - \(reading.temperatureC)C")
+      display.drawText("Temperature - ", color: .on)
+      display.drawNumber(Int(reading.temperatureC), suffix: "C")
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
-      display.drawText("Humidity    - \(reading.humidityPercent)P")
+      display.drawText("Humidity    - ", color: .on)
+      display.drawNumber(Int(reading.humidityPercent), suffix: "P")
     } else {
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
       display.drawText("No reading", color: .on)
@@ -80,9 +82,11 @@ struct SSD1306Renderer {
     display.setCursor(x: 4 + shiftX, y: 24 + shiftY)
 
     if let reading {
-      display.drawText("T - \(reading.temperatureC)C")
+      display.drawText("T - ", color: .on)
+      display.drawNumber(Int(reading.temperatureC), suffix: "C")
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
-      display.drawText("H - \(reading.humidityPercent)P")
+      display.drawText("H - ", color: .on)
+      display.drawNumber(Int(reading.humidityPercent), suffix: "P")
     } else {
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
       display.drawText("NA", color: .on)
@@ -102,4 +106,47 @@ enum TrafficLightColor: Int {
   case green = 2
   /// No light illuminated, the fourth in the traffic light sequence.
   case off = 3
+}
+
+private extension SSD1306Driver {
+  func drawNumber(_ value: Int, suffix: StaticString? = nil, color: SwiftGFX.Color = .on) {
+    if value == 0 {
+      drawDigit(0, color: color)
+    } else {
+      if value < 0 {
+        drawText("-", color: color)
+      }
+
+      var divisor = 1
+      var remaining = value < 0 ? -value : value
+      while remaining / divisor >= 10 {
+        divisor *= 10
+      }
+
+      while divisor > 0 {
+        let digit = (remaining / divisor) % 10
+        drawDigit(digit, color: color)
+        divisor /= 10
+      }
+    }
+
+    if let suffix {
+      drawText(suffix, color: color)
+    }
+  }
+
+  private func drawDigit(_ digit: Int, color: SwiftGFX.Color) {
+    switch digit {
+    case 0: drawText("0", color: color)
+    case 1: drawText("1", color: color)
+    case 2: drawText("2", color: color)
+    case 3: drawText("3", color: color)
+    case 4: drawText("4", color: color)
+    case 5: drawText("5", color: color)
+    case 6: drawText("6", color: color)
+    case 7: drawText("7", color: color)
+    case 8: drawText("8", color: color)
+    default: drawText("9", color: color)
+    }
+  }
 }

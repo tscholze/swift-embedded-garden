@@ -202,19 +202,6 @@ struct SwiftGFX {
     }
   }
 
-  /// Renders a runtime string at the current cursor position.
-  mutating func drawText(_ text: String, color: Color = .on) {
-    for character in text.utf8 {
-      if character == 10 {
-        cursorX = 0
-        cursorY += 8 * textScale
-      } else {
-        drawCharacter(character, x: cursorX, y: cursorY, color: color)
-        cursorX += 6 * textScale
-      }
-    }
-  }
-
   /// Renders one 5x7 glyph from the compact column-major font table.
   private mutating func drawCharacter(_ character: UInt8, x: Int, y: Int, color: Color) {
     let columns = glyphColumns(for: character)
