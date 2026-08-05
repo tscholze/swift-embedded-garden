@@ -131,6 +131,18 @@ struct TrafficLight {
     RP2040GPIO.setHigh(pin: greenPin)
   }
 
+  func showAllOff() {
+    RP2040GPIO.setLow(pin: redPin)
+    RP2040GPIO.setLow(pin: yellowPin)
+    RP2040GPIO.setLow(pin: greenPin)
+  }
+
+  func showAllOn() {
+    RP2040GPIO.setHigh(pin: redPin)
+    RP2040GPIO.setHigh(pin: yellowPin)
+    RP2040GPIO.setHigh(pin: greenPin)
+  }
+
   // MARK: - Private helpers -
 
   private func configure() {

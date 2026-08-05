@@ -68,7 +68,7 @@ struct SSD1306Renderer {
       display.drawText("No reading", color: .on)
     }
 
-    _ = display.flush()
+    // _ = display.flush()
   }
 
   /// Draws the latest DHT11 sensor reading in a shorten representation
@@ -91,8 +91,6 @@ struct SSD1306Renderer {
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
       display.drawText("NA", color: .on)
     }
-
-    _ = display.flush()
   }
 }
 
