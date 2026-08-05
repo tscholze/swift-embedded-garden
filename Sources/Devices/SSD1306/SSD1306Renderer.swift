@@ -108,8 +108,10 @@ enum TrafficLightColor: Int {
   case off = 3
 }
 
-private extension SSD1306Driver {
-  func drawNumber(_ value: Int, suffix: StaticString? = nil, color: SwiftGFX.Color = .on) {
+extension SSD1306Driver {
+  fileprivate func drawNumber(
+    _ value: Int, suffix: StaticString? = nil, color: SwiftGFX.Color = .on
+  ) {
     if value == 0 {
       drawDigit(0, color: color)
     } else {

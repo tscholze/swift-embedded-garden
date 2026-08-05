@@ -5,13 +5,11 @@
 
 @_cdecl("swift_main")
 public func swift_main() -> Never {
+  // Main and combined sample
+  Sample().run()
 
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
   // blink()
-
-  //Sample().run()
-
-  BuzzerSample().run()
 
   // 2. Blink a traffic light sequence using GPIO15, GPIO14, and GPIO12.
   // blinkTrafficLight()
@@ -24,6 +22,9 @@ public func swift_main() -> Never {
 
   // 5. Read temperature and humidity from a KY-015 DHT11 sensor.
   // GPIOSample().run()
+
+  // 6. Demonstrate buzzer.
+  //BuzzerSample().run()
 }
 
 // MARK: - Samples -

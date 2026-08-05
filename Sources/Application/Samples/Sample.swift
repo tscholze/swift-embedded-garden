@@ -1,5 +1,6 @@
-/// A sample that demonstrates a variarty of features,
-/// including rotary encoder input, traffic light output, and SSD1306 display rendering.
+/// A sample that demonstrates a variety of features,
+/// including many accessories, such as a rotary encoder,
+/// traffic light, DHT11 sensor, SSD1306 display, and buzzer.
 class Sample {
   // MARK: - Pin Assignments -
 
@@ -7,12 +8,14 @@ class Sample {
   private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
   private let dht11c = DHT11Configuration(dataPin: 22)
   private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
+  private let buzzerc = BuzzerConfiguration(triggerPin: 28)
 
   // MARK: - Peripherals -
 
   private var renderer: SSD1306Renderer!
   private var display: SSD1306Driver!
   private var trafficLight: TrafficLight!
+  private var buzzer: Buzzer!
 
   // MARK: - Sample -
 
@@ -22,11 +25,14 @@ class Sample {
     // Setup DHT11 sensor
     let dht11Sensor = DHT11(configuration: dht11c)
 
-    // Setup traffic light
-    trafficLight = TrafficLight(configuration: tlc)
-
     // Setup rotary button
     let rotaryButton = RotaryButton(configuration: rbc)
+
+    // Setup buzzer
+    buzzer = Buzzer(configuration: buzzerc)
+
+    // Setup traffic light
+    trafficLight = TrafficLight(configuration: tlc)
 
     // Setup display
     display = SSD1306Driver(configuration: ssd1306c)
@@ -48,6 +54,7 @@ class Sample {
 
     var position = 0
 
+    // Start never ending looping
     while true {
       showCycleIndicator()
 
@@ -61,13 +68,17 @@ class Sample {
         displayFaultLoop(blinks: 3)
       }
 
-      // apply modulo 3 mapping: 0 -> red, 1 -> yellow, 2 -> green
+      // Apply modulo 3 mapping:
+      // 0 -> red
+      // 1 -> yellow
+      // 2 -> green
+      // others -> off
       let modulo = ((position % 3) + 3) % 3
       switch modulo {
       case 0: showRed(reading: reading)
       case 1: showYellow(reading: reading)
       case 2: showGreen(reading: reading)
-      default: showRed(reading: reading)
+      default: render(activeLight: .off, reading: reading)
       }
 
       // small debounce delay
@@ -79,7 +90,9 @@ class Sample {
 
   /// Triggeres a new render cycle for the display
   ///
-  /// - Parameter activeLight: The light to illuminate.
+  /// - Parameters:
+  ///   - activeLight: The light to illuminate.
+  ///   - reading: The optional DHT11 sensor reading.
   private func render(activeLight: TrafficLightColor, reading: DHT11Reading? = nil) {
     display.clear()
     renderer.drawTitle("Swift Embedded Garden")
@@ -92,6 +105,8 @@ class Sample {
     guard case .success = display.flush() else {
       displayFaultLoop(blinks: 2)
     }
+
+    buzzer.buzz()
   }
 
   // MARK: - Helper -

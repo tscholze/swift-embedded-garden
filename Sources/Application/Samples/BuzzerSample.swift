@@ -1,20 +1,17 @@
+/// Demonstrates using the Buzzer device.
 struct BuzzerSample {
-  private let buzzerPin: UInt32 = 28
-  private let ledPin: UInt32 = 25
 
-  init() {
-    RP2040GPIO.configureAsSIOOutput(pin: buzzerPin)
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
-  }
+  // MARK: - Sample run -
 
   func run() -> Never {
+
+    let buzzer = Buzzer(configuration: BuzzerConfiguration(triggerPin: 28))
+
     while true {
-      RP2040GPIO.setHigh(pin: buzzerPin)
-      RP2040GPIO.setHigh(pin: ledPin)
-      pico_delay_ms(2_000)
-      RP2040GPIO.setLow(pin: buzzerPin)
-      RP2040GPIO.setLow(pin: ledPin)
-      pico_delay_ms(2_000)
+      buzzer.buzz()
+      pico_delay_ms(1_000)
+      buzzer.buzz()
+      pico_delay_ms(1_000)
     }
   }
 }
