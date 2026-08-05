@@ -48,6 +48,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11Configuration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/Buzzer/Buzzer.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/Button/Button.swift"
 
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
