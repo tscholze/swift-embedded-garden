@@ -20,7 +20,7 @@ jobs:
       - name: Set up Swift 6.5-dev
         uses: vapor/swiftly-action@v0.2
         with:
-          toolchain: "6.5-dev"
+          toolchain: "main-snapshot-2026-05-18"
 
       - name: Install Linux build dependencies
         run: |
