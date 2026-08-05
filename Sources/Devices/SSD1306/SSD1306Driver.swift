@@ -106,11 +106,6 @@ final class SSD1306Driver {
     graphics.drawText(text, color: color)
   }
 
-  /// Draws runtime text into the framebuffer; call ``flush()`` to make it visible.
-  func drawText(_ text: String, color: SwiftGFX.Color = .on) {
-    graphics.drawText(text, color: color)
-  }
-
   /// Turns the SSD1306 panel output on or off while retaining framebuffer RAM.
   func setDisplayEnabled(_ enabled: Bool) -> Result<Void, RP2040I2C.Error> {
     sendCommands([enabled ? 0xaf : 0xae])
