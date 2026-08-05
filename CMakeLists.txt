@@ -44,7 +44,6 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Configuration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SwiftGFX.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButton.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonController.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonConfiguration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11Configuration.swift"
