@@ -29,7 +29,9 @@ pico_sdk_init()
 # because CMake/SwiftEmbedded.cmake invokes swiftc directly rather than SwiftPM.
 set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Main.swift"
+
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/Sample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/BuzzerSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLightSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
@@ -46,6 +48,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/RotaryButton/RotaryButtonConfiguration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11Configuration.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/Buzzer/Buzzer.swift"
 
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
