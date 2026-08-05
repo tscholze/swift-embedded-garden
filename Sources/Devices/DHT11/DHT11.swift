@@ -17,17 +17,16 @@ struct DHT11 {
   /// Reads a single temperature and humidity sample from the sensor.
   func read() throws -> DHT11Reading {
     let maxAttempts = 3
-    var lastError: DHT11Error = .timeout
     for attempt in 0..<maxAttempts {
       do {
         return try readTransaction()
-      } catch let error as DHT11Error {
-        lastError = error
-        if attempt < maxAttempts - 1 { pico_delay_ms(5) }
+      } catch {
+        if attempt == maxAttempts - 1 { throw error }
+        pico_delay_ms(5)
       }
     }
 
-    throw lastError
+    throw DHT11Error.timeout
   }
 
   // MARK: - Private helper -

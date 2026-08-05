@@ -118,7 +118,7 @@ private extension SSD1306Driver {
       }
 
       var divisor = 1
-      let remaining = value < 0 ? -value : value
+      var remaining = value < 0 ? -value : value
       while remaining / divisor >= 10 {
         divisor *= 10
       }
