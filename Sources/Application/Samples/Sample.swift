@@ -9,6 +9,7 @@ class Sample {
   private let dht11c = DHT11Configuration(dataPin: 22)
   private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
   private let buzzerc = BuzzerConfiguration(triggerPin: 28)
+  private let buttonc = ButtonConfiguration(triggerPin: 16)
 
   // MARK: - Peripherals -
 
@@ -27,6 +28,9 @@ class Sample {
 
     // Setup rotary button
     let rotaryButton = RotaryButton(configuration: rbc)
+
+    // Setup button
+    let button = Button(configuration: buttonc)
 
     // Setup buzzer
     buzzer = Buzzer(configuration: buzzerc)
@@ -58,8 +62,12 @@ class Sample {
     while true {
       showCycleIndicator()
 
-      guard let direction = rotaryButton.waitForDirection() else { continue }
-      position += direction
+      if button.isPressed() {
+        position += 1
+      } else {
+        guard let direction = rotaryButton.waitForDirection() else { continue }
+        position += direction
+      }
 
       var reading: DHT11Reading? = nil
       do {
@@ -79,6 +87,13 @@ class Sample {
       case 1: showYellow(reading: reading)
       case 2: showGreen(reading: reading)
       default: render(activeLight: .off, reading: reading)
+      }
+
+      // Keep the position within the range
+      // of 0-2 to avoid integer overflow.
+      if position == 2 || position == -2 {
+        position = 0
+        displayFaultLoop(blinks: 3)
       }
 
       // small debounce delay
