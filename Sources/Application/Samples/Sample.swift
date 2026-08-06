@@ -62,6 +62,11 @@ class Sample {
     while true {
       showCycleIndicator()
 
+      /// 1. Check if the button is pressed.
+      /// If it is, increment the position by 1.
+      ///
+      /// 2. If the button is not pressed,
+      /// check if the rotary encoder has been turned.
       if button.isPressed() {
         position += 1
       } else {
@@ -69,6 +74,8 @@ class Sample {
         position += direction
       }
 
+      /// 3. Read the DHT11 sensor to get the current
+      ///  temperature and humidity.
       var reading: DHT11Reading? = nil
       do {
         reading = try dht11Sensor.read()
@@ -76,24 +83,17 @@ class Sample {
         displayFaultLoop(blinks: 3)
       }
 
-      // Apply modulo 3 mapping:
-      // 0 -> red
-      // 1 -> yellow
-      // 2 -> green
-      // others -> off
-      let modulo = ((position % 3) + 3) % 3
-      switch modulo {
-      case 0: showRed(reading: reading)
-      case 1: showYellow(reading: reading)
-      case 2: showGreen(reading: reading)
-      default: render(activeLight: .off, reading: reading)
-      }
-
-      // Keep the position within the range
-      // of 0-2 to avoid integer overflow.
-      if position == 2 || position == -2 {
+      // 4. Apply coloring
+      switch abs(position) {
+      case 0:
+        showRed(reading: reading)
+      case 1:
+        showYellow(reading: reading)
+      case 2:
+        showGreen(reading: reading)
         position = 0
-        displayFaultLoop(blinks: 3)
+      default:
+        render(activeLight: .off, reading: reading)
       }
 
       // small debounce delay
