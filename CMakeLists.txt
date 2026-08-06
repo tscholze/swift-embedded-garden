@@ -34,6 +34,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/BuzzerSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLightSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/ButtonSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DHT11Sample.swift"
