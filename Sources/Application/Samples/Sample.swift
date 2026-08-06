@@ -83,7 +83,7 @@ class Sample {
         displayFaultLoop(blinks: 3)
       }
 
-      // 4. Apply coloring
+      // 4. Perform rendering
       switch abs(position) {
       case 0:
         showRed(reading: reading)
