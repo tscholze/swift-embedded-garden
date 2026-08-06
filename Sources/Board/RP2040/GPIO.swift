@@ -297,96 +297,70 @@ enum RP2040GPIO {
   ///
   /// - Parameters:
   ///   - pin: GPIO pin number to watch.
-  ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+  ///   - timeoutMs: Timeout in milliseconds.
   /// - Returns: `true` if the pin reached high, `false` if timed out.
-  static func waitForHigh(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
-    if let t = timeoutMs {
-      var remaining = t
-      while remaining > 0 {
-        if read(pin: pin) { return true }
-        pico_delay_ms(1)
-        remaining -= 1
-      }
-      return false
-    } else {
-      while !read(pin: pin) {}
-      return true
+  static func waitForHigh(pin: UInt32, timeoutMs: UInt32) -> Bool {
+    var remaining = timeoutMs
+    while remaining > 0 {
+      if read(pin: pin) { return true }
+      pico_delay_ms(1)
+      remaining -= 1
     }
+    return false
   }
 
   /// Wait until the pin reads low (logic 0) or optional timeout elapses.
   ///
   /// - Parameters:
   ///   - pin: GPIO pin number to watch.
-  ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+  ///   - timeoutMs: Timeout in milliseconds.
   /// - Returns: `true` if the pin reached low, `false` if timed out.
-  static func waitForLow(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
-    if let t = timeoutMs {
-      var remaining = t
-      while remaining > 0 {
-        if !read(pin: pin) { return true }
-        pico_delay_ms(1)
-        remaining -= 1
-      }
-      return false
-    } else {
-      while read(pin: pin) {}
-      return true
+  static func waitForLow(pin: UInt32, timeoutMs: UInt32) -> Bool {
+    var remaining = timeoutMs
+    while remaining > 0 {
+      if !read(pin: pin) { return true }
+      pico_delay_ms(1)
+      remaining -= 1
     }
+    return false
   }
 
   /// Wait for a rising edge (low -> high) on `pin`.
   ///
   /// - Parameters:
   ///   - pin: GPIO pin number to watch.
-  ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+  ///   - timeoutMs: Timeout in milliseconds.
   /// - Returns: `true` if a rising edge occurred, `false` if timed out.
-  static func waitForRisingEdge(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+  static func waitForRisingEdge(pin: UInt32, timeoutMs: UInt32) -> Bool {
     var last = read(pin: pin)
-    if let t = timeoutMs {
-      var remaining = t
-      while remaining > 0 {
-        let cur = read(pin: pin)
-        if !last && cur { return true }
-        last = cur
-        pico_delay_ms(1)
-        remaining -= 1
-      }
-      return false
-    } else {
-      while true {
-        let cur = read(pin: pin)
-        if !last && cur { return true }
-        last = cur
-      }
+    var remaining = timeoutMs
+    while remaining > 0 {
+      let cur = read(pin: pin)
+      if !last && cur { return true }
+      last = cur
+      pico_delay_ms(1)
+      remaining -= 1
     }
+    return false
   }
 
   /// Wait for a falling edge (high -> low) on `pin`.
   ///
   /// - Parameters:
   ///   - pin: GPIO pin number to watch.
-  ///   - timeoutMs: Optional timeout in milliseconds. If `nil`, wait forever.
+  ///   - timeoutMs: Timeout in milliseconds.
   /// - Returns: `true` if a falling edge occurred, `false` if timed out.
-  static func waitForFallingEdge(pin: UInt32, timeoutMs: UInt32? = nil) -> Bool {
+  static func waitForFallingEdge(pin: UInt32, timeoutMs: UInt32) -> Bool {
     var last = read(pin: pin)
-    if let t = timeoutMs {
-      var remaining = t
-      while remaining > 0 {
-        let cur = read(pin: pin)
-        if last && !cur { return true }
-        last = cur
-        pico_delay_ms(1)
-        remaining -= 1
-      }
-      return false
-    } else {
-      while true {
-        let cur = read(pin: pin)
-        if last && !cur { return true }
-        last = cur
-      }
+    var remaining = timeoutMs
+    while remaining > 0 {
+      let cur = read(pin: pin)
+      if last && !cur { return true }
+      last = cur
+      pico_delay_ms(1)
+      remaining -= 1
     }
+    return false
   }
 
   /// Set the output level for `pin` to logical low (0).

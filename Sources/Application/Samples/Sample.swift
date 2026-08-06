@@ -76,12 +76,7 @@ class Sample {
 
       /// 3. Read the DHT11 sensor to get the current
       ///  temperature and humidity.
-      var reading: DHT11Reading? = nil
-      do {
-        reading = try dht11Sensor.read()
-      } catch {
-        displayFaultLoop(blinks: 3)
-      }
+      let reading = try? dht11Sensor.read()
 
       // 4. Perform rendering
       switch abs(position) {
@@ -96,7 +91,7 @@ class Sample {
         render(activeLight: .off, reading: reading)
       }
 
-      // small debounce delay
+      // 5. Small debounce delay
       pico_delay_ms(250)
     }
   }
@@ -117,11 +112,11 @@ class Sample {
       renderer.drawReadingShort(reading, shiftX: 30, shiftY: 4)
     }
 
+    buzzer.buzz()
+
     guard case .success = display.flush() else {
       displayFaultLoop(blinks: 2)
     }
-
-    buzzer.buzz()
   }
 
   // MARK: - Helper -

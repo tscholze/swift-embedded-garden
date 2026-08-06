@@ -17,7 +17,9 @@ struct Button {
   // MARK: - Public methods -
 
   /// Checks if the button was pressed since
-  ///  the last time this method was called.
+  /// the last time this method was called.
+  ///
+  /// - Returns: `true` if the button was pressed, `false` otherwise.
   func isPressed() -> Bool {
     return !RP2040GPIO.read(pin: configuration.triggerPin)
   }
