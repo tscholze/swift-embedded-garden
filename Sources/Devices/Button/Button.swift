@@ -43,16 +43,8 @@ struct Button {
   // MARK: - Private methods -
 
   private func configure() {
-    RP2040GPIO.configureAsSIOInput(pin: configuration.triggerPin)
-
-    // The pull has to oppose the level a press produces, otherwise the pin
-    // never changes state. The KY-004 already carries an external pull-down;
-    // the internal one runs in parallel and does no harm.
-    if configuration.isActiveHigh {
-      RP2040GPIO.enablePadPullDown(pin: configuration.triggerPin)
-    } else {
-      RP2040GPIO.enablePadPullUp(pin: configuration.triggerPin)
-    }
+    let pull: RP2040GPIO.Pull = configuration.isActiveHigh ? .down : .up
+    RP2040GPIO.configureAsSIOInput(pin: configuration.triggerPin, pull: pull)
   }
 
   private static func readPressed(_ configuration: ButtonConfiguration) -> Bool {
