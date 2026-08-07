@@ -1,5 +1,5 @@
 /// A simple button that can be used to trigger
-///  actions in the application.
+/// actions in the application.
 struct Button {
   // MARK: - Private properties -
   private let configuration: ButtonConfiguration
@@ -30,7 +30,7 @@ struct Button {
   }
 
   /// Checks if the button was pressed since
-  ///  the last time this method was called.
+  /// the last time this method was called.
   ///
   /// Returns `true` only on the transition from released to pressed, so
   /// holding the button down does not trigger repeatedly.
@@ -60,7 +60,7 @@ struct Button {
   }
 }
 
-/// A configuration for a button, which defines
+/// A configuration for a button.
 struct ButtonConfiguration {
   /// The GPIO pin that is used to trigger the button.
   let triggerPin: UInt32
