@@ -91,8 +91,6 @@ struct SSD1306Renderer {
       display.setCursor(x: 4 + shiftX, y: 38 + shiftY)
       display.drawText("NA", color: .on)
     }
-
-    _ = display.flush()
   }
 }
 

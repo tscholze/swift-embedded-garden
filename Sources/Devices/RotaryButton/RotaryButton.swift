@@ -21,7 +21,8 @@ struct RotaryButton {
   /// - Returns: `1` for a clockwise step, `-1` for a counter-clockwise step, or `nil` if the state was unstable or the timeout elapsed.
   func waitForDirection() -> Int? {
     guard
-      RP2040GPIO.waitForRisingEdge(pin: configuration.clkPin, timeoutMs: configuration.timeoutMs)
+      RP2040GPIO.waitForRisingEdge(
+        pin: configuration.clkPin, timeoutUs: configuration.timeoutMs * 1_000)
     else {
       return nil
     }

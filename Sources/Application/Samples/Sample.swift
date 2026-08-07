@@ -4,11 +4,14 @@
 class Sample {
   // MARK: - Pin Assignments -
 
-  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15)
+  // The rotary wait blocks the loop, so its timeout also decides how often
+  // the button gets sampled. Keep it short.
+  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15, timeoutMs: 20)
   private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
   private let dht11c = DHT11Configuration(dataPin: 22)
   private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
   private let buzzerc = BuzzerConfiguration(triggerPin: 28)
+  private let buttonc = ButtonConfiguration(triggerPin: 16)
 
   // MARK: - Peripherals -
 
@@ -28,6 +31,9 @@ class Sample {
     // Setup rotary button
     let rotaryButton = RotaryButton(configuration: rbc)
 
+    // Setup button
+    var button = Button(configuration: buttonc)
+
     // Setup buzzer
     buzzer = Buzzer(configuration: buzzerc)
 
@@ -46,26 +52,42 @@ class Sample {
     // Configure renderer
     renderer = SSD1306Renderer(display: display)
 
+    // The onboard LED is used as a cycle indicator.
+    RP2040GPIO.configureAsSIOOutput(pin: 25)
+
     // Wait that everything is ready before starting the main loop.
     pico_delay_ms(2_000)
 
     // Draw the initial frame and send it to the display.
-    render(activeLight: .off, reading: try? dht11Sensor.read())
+    var reading: DHT11Reading? = try? dht11Sensor.read()
+    render(activeLight: .off, reading: reading)
 
     var position = 0
 
     // Start never ending looping
     while true {
+      // Both inputs are checked every pass. The button is read first because
+      // it returns immediately, while the rotary wait blocks.
+      var didMove = false
+
+      if button.wasPressed() {
+        position += 1
+        didMove = true
+      } else if let direction = rotaryButton.waitForDirection() {
+        position += direction
+        didMove = true
+      }
+
+      // Nothing to do, so go straight back to watching the inputs instead of
+      // spending time on the sensor and the display.
+      guard didMove else { continue }
+
       showCycleIndicator()
 
-      guard let direction = rotaryButton.waitForDirection() else { continue }
-      position += direction
-
-      var reading: DHT11Reading? = nil
-      do {
-        reading = try dht11Sensor.read()
-      } catch {
-        displayFaultLoop(blinks: 3)
+      // A failed sensor read is expected now and then. Keep the last good
+      // value rather than taking the whole device down.
+      if let freshReading = try? dht11Sensor.read() {
+        reading = freshReading
       }
 
       // Apply modulo 3 mapping:
@@ -79,6 +101,12 @@ class Sample {
       case 1: showYellow(reading: reading)
       case 2: showGreen(reading: reading)
       default: render(activeLight: .off, reading: reading)
+      }
+
+      // Keep the position within the range
+      // of 0-2 to avoid integer overflow.
+      if position == 3 || position == -3 {
+        position = 0
       }
 
       // small debounce delay

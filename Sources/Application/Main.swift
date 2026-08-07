@@ -25,6 +25,9 @@ public func swift_main() -> Never {
 
   // 6. Demonstrate buzzer.
   //BuzzerSample().run()
+
+  // 7. Keep onboard LED on while button is pressed.
+  // ButtonSample().run()
 }
 
 // MARK: - Samples -

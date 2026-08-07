@@ -34,6 +34,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/BuzzerSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/TrafficLightSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/ButtonSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DHT11Sample.swift"
@@ -48,6 +49,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/DHT11/DHT11Configuration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/Buzzer/Buzzer.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/Button/Button.swift"
 
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/MMIO.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Board/RP2040/GPIO.swift"
