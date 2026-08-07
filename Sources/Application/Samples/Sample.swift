@@ -90,22 +90,23 @@ class Sample {
         reading = freshReading
       }
 
-      // Keep the position within the range
-      // of 0-2 to avoid integer overflow.
-      if abs(position) > 2 {
-        position = 0
-      }
-
       // Apply modulo 3 mapping:
       // 0 -> red
       // 1 -> yellow
       // 2 -> green
       // others -> off
-      switch position {
+      let modulo = ((position % 3) + 3) % 3
+      switch modulo {
       case 0: showRed(reading: reading)
       case 1: showYellow(reading: reading)
       case 2: showGreen(reading: reading)
       default: render(activeLight: .off, reading: reading)
+      }
+
+      // Keep the position within the range
+      // of 0-2 to avoid integer overflow.
+      if position == 3 || position == -3 {
+        position = 0
       }
 
       // small debounce delay

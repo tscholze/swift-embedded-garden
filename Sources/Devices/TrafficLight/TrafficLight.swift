@@ -73,7 +73,7 @@ struct TrafficLight {
       showCycleIndicator()
 
       // Wait for rising edge on CLK (blocks).
-      _ = RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutUs: 1_000 * 1_000)
+      _ = RP2040GPIO.waitForRisingEdge(pin: clkPin, timeoutUs: 10_000 * 1_000)
 
       // read DT to determine direction; typical rule: when CLK rises,
       // if DT!=CLK then direction is one way, otherwise the other.
