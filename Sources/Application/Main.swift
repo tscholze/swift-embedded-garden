@@ -28,6 +28,9 @@ public func swift_main() -> Never {
 
   // 7. Keep onboard LED on while button is pressed.
   // ButtonSample().run()
+
+  // 8. Demonstrate the DRV8833 dual H-bridge driver.
+  // DRV8833Sample().run()
 }
 
 // MARK: - Samples -
