@@ -1,12 +1,3 @@
-/// Motor bridge selection used by ``DRV8833``.
-enum DRV8833Motor {
-  /// The first bridge, also called motor A.
-  case motorA
-
-  /// The second bridge, also called motor B.
-  case motorB
-}
-
 /// A minimal DRV8833 dual H-bridge controller for small brushed DC motors.
 ///
 /// The driver configures each bridge input for PWM output and then drives the
@@ -169,7 +160,7 @@ struct DRV8833 {
   /// - Parameters:
   ///   - motor: Bridge selection.
   ///   - speedPercent: Signed speed percentage from -100 to 100.
-  private func setMotor(motor: DRV8833Motor, speedPercent: Double) {
+  private func setMotor(motor: Motor, speedPercent: Double) {
     let clampedSpeedPercent = clamp(speedPercent, lowerBound: -100, upperBound: 100)
     let dutyPercent = abs(clampedSpeedPercent)
 
@@ -198,7 +189,7 @@ struct DRV8833 {
   /// - Parameters:
   ///   - motor: Bridge selection.
   ///   - brake: When `true`, both inputs are driven high.
-  private func stopMotor(motor: DRV8833Motor, brake: Bool) {
+  private func stopMotor(motor: Motor, brake: Bool) {
     let pins = bridgePins(for: motor)
 
     if brake {
@@ -216,7 +207,7 @@ struct DRV8833 {
   ///
   /// - Parameter motor: Bridge selection.
   /// - Returns: The two GPIO pins that wire into the DRV8833 bridge.
-  private func bridgePins(for motor: DRV8833Motor) -> (in1Pin: UInt32, in2Pin: UInt32) {
+  private func bridgePins(for motor: Motor) -> (in1Pin: UInt32, in2Pin: UInt32) {
     switch motor {
     case .motorA:
       return (configuration.motorAIn1Pin, configuration.motorAIn2Pin)
@@ -245,5 +236,16 @@ struct DRV8833 {
   /// - Returns: A value limited to the closed interval `[lowerBound, upperBound]`.
   private func clamp(_ value: Double, lowerBound: Double, upperBound: Double) -> Double {
     min(max(value, lowerBound), upperBound)
+  }
+}
+
+extension DRV8833 {
+  /// Motor bridge selection used by ``DRV8833``.
+  enum Motor {
+    /// The first bridge, also called motor A.
+    case motorA
+
+    /// The second bridge, also called motor B.
+    case motorB
   }
 }
