@@ -21,11 +21,16 @@ If you are looking for the single-file-based generator to setup your own Swift e
 
 The repository currently includes a few small beginner-friendly samples under the application layer:
 
-- `GPIOSample` — configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors.
-- `PWMSample` — configures PWM on the onboard LED and ramps the brightness up and down.
-- `TrafficLight` — demonstrates a simple traffic-light style output sequence and can also use a KY-040 rotary encoder to switch between red, yellow, and green states.
-- `GPIOSample` — reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line.
-- `DRV8833Sample` — drives a brushed DC motor with a DRV8833 dual H-bridge using PWM-based forward/reverse control and optional brake/coast behavior.
+| Sample | Source file | Description |
+|---|---|---|
+| `GPIOSample` | `Sources/Application/Samples/GPIOSample.swift` | Configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors. |
+| `PWMSample` | `Sources/Application/Samples/PWMSample.swift` | Configures PWM on the onboard LED and ramps the brightness up and down. |
+| `ButtonSample` | `Sources/Application/Samples/ButtonSample.swift` | Turns the onboard LED on while a button is held and off when released. |
+| `BuzzerSample` | `Sources/Application/Samples/BuzzerSample.swift` | Triggers a passive buzzer on a GPIO pin at a timed interval. |
+| `TrafficLightSample` | `Sources/Application/Samples/TrafficLightSample.swift` | Drives a three-LED traffic light sequence and optionally reads a KY-040 rotary encoder to select the active light. |
+| `DHTS11Sample` | `Sources/Application/Samples/DHT11Sample.swift` | Reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line. |
+| `DRV8833Sample` | `Sources/Application/Samples/DRV8833Sample.swift` | Drives a brushed DC motor with a DRV8833 dual H-bridge using PWM-based forward/reverse control and optional brake/coast behavior. |
+| `DisplaySample` | `Sources/Application/Samples/DisplaySample.swift` | Initializes an Elegoo 0.96-inch SSD1306 OLED over I2C and draws text and graphics into a framebuffer. |
 
 You can switch which sample runs by updating the entry point in `Sources/Application/Main.swift`.
 
@@ -160,11 +165,152 @@ Scripts/run.sh --no-flash
   register maps and peripheral logic in Swift while retaining the volatile
   reads and writes required by RP2040 device memory.
 
-## SSD1306 OLED Example
+## GPIO sample
 
-The active firmware sample initializes an Elegoo 0.96-inch 128x64 SSD1306 OLED,
-draws `Hello Swift Embedded` and basic primitives into a 1,024-byte framebuffer,
-then transfers the framebuffer over RP2040 I2C0.
+The `GPIOSample` demonstrates basic GPIO output and input on the RP2040.
+The device is implemented in `Sources/Board/RP2040/GPIO.swift` and the sample entrypoint is `GPIOSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| Onboard LED | GP25 (built-in) |
+| Example input | GP15 |
+
+### Feature highlights
+
+- Configure a GPIO pin as a CPU-controlled output and toggle it high/low.
+- Configure a GPIO pin as an input and enable the internal pull-up resistor.
+- Read the current level of an input pin to detect external signals.
+
+## PWM sample
+
+The `PWMSample` ramps the onboard LED brightness up and down using the RP2040 PWM peripheral.
+The device is implemented in `Sources/Board/RP2040/PWM.swift` and the sample entrypoint is `PWMSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| Onboard LED | GP25 (built-in) |
+
+### Feature highlights
+
+- Configure a PWM channel at 1 kHz on any GPIO pin.
+- Ramp duty cycle from 0 % to 100 % and back for a smooth LED breath effect.
+- Falls back to a simple GPIO blink if PWM setup fails.
+
+## Button sample
+
+The `ButtonSample` turns the onboard LED on while a button is held and off when released.
+The device is implemented as `Button` in `Sources/Devices/Button/` and the sample entrypoint is `ButtonSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| Onboard LED | GP25 (built-in) |
+| Button signal | GP16 |
+
+Connect the KY-004 button module or a bare momentary switch between the signal pin and VCC (active-high) or GND (active-low), adjusting `isActiveHigh` accordingly.
+
+### Feature highlights
+
+- `isPressed()` for real-time level reading.
+- `wasPressed()` for edge-triggered (press-once) detection.
+- Configurable active-high or active-low polarity.
+
+## Buzzer sample
+
+The `BuzzerSample` triggers a passive buzzer on a GPIO pin at a timed interval.
+The device is implemented as `Buzzer` in `Sources/Devices/Buzzer/` and the sample entrypoint is `BuzzerSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| Buzzer signal | GP28 |
+| VCC | 3V3(OUT) |
+| GND | GND |
+
+### Feature highlights
+
+- Drive a passive buzzer with a configurable GPIO pin.
+- Controllable buzz duration via `buzz(durationMs:)`.
+- Repeating buzz pattern with configurable inter-buzz delay.
+
+## Traffic light sample
+
+The `TrafficLightSample` cycles through a red/yellow/green LED sequence and optionally uses a KY-040 rotary encoder to manually select the active light.
+The device is implemented as `TrafficLight` in `Sources/Devices/TrafficLight/` and the sample entrypoint is `TrafficLightSample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| Red LED | Configurable via `TrafficLightConfiguration` |
+| Yellow LED | Configurable via `TrafficLightConfiguration` |
+| Green LED | Configurable via `TrafficLightConfiguration` |
+| KY-040 DT (optional) | GP14 |
+| KY-040 CLK (optional) | GP15 |
+| KY-040 SW (optional) | GP13 |
+
+### Feature highlights
+
+- Automatic timed red/yellow/green cycle.
+- Optional KY-040 rotary encoder input to manually select the active light.
+- Cycle indicator blink before each state change.
+
+## DHT11 sensor sample
+
+The `DHTS11Sample` reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor.
+The device is implemented as `DHT11` in `Sources/Devices/DHT11/` and the sample entrypoint is `DHTS11Sample` in `Sources/Application/Samples/DHT11Sample.swift`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| DATA | GP2, GP3, GP15, or GP22 |
+| VCC | 3V3(OUT) |
+| GND | GND |
+
+GP0/GP1 are not recommended (USB), GP4/GP5 are default I2C pins, and GP6–GP11 are tied to the onboard QSPI flash. GP2 and GP3 are the simplest verified choices.
+
+### Feature highlights
+
+- One-wire DHT11 bit-bang protocol over a single GPIO data line.
+- Returns temperature in °C and relative humidity in % per reading.
+- LED success/failure indicator: one brief pulse on success, three rapid pulses on failure.
+- 2-second cooldown enforced between readings as required by the DHT11 datasheet.
+
+## DRV8833 motor sample
+
+The `DRV8833Sample` drives a brushed DC motor forward, reverse, and stopped using a DRV8833 dual H-bridge.
+The device is implemented as `DRV8833` in `Sources/Devices/DRV8833/` and the sample entrypoint is `DRV8833Sample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+| Signal | Raspberry Pi Pico pin |
+| --- | --- |
+| AIN1 | GP14 |
+| AIN2 | GP15 |
+| BIN1 | GP8 |
+| BIN2 | GP9 |
+| nSLEEP (optional) | not connected by default |
+
+Connect the DRV8833 VM pin to the motor supply, VCC to 3.3V logic, GND to Pico ground, and motor terminals to AOUT1/AOUT2 or BOUT1/BOUT2.
+
+### Feature highlights
+
+- Signed speed control from `-100` to `100` for forward and reverse motion.
+- PWM-based motor drive using the RP2040 PWM peripheral.
+- Optional brake and coast stop modes.
+- Support for an optional `nSLEEP` pin to wake the H-bridge before driving.
+
+## SSD1306 OLED display sample
+
+The `DisplaySample` initializes an Elegoo 0.96-inch 128x64 SSD1306 OLED over I2C and renders text and graphics into a 1,024-byte framebuffer.
+The device is implemented as `SSD1306Driver` in `Sources/Devices/SSD1306/` and the sample entrypoint is `DisplaySample` in `Sources/Application/Samples/`.
 
 ### Wiring
 
@@ -175,66 +321,12 @@ then transfers the framebuffer over RP2040 I2C0.
 | SDA | GP4 |
 | SCL | GP5 |
 
-The example tries I2C addresses `0x3C` and `0x3D`; `0x3C` is the default used
-by the Elegoo documentation. The module has no reset wire, so the driver uses
-the SSD1306 display-off and full initialization command sequence instead.
-
-### Module Boundaries
-
-- `Sources/Board/RP2040/I2C.swift` configures I2C0 by direct register access.
-  Its register timing and blocking write behavior are a Swift transform of the
-  Pico SDK `hardware_i2c` implementation.
-- `Sources/Devices/SSD1306/SwiftGFX.swift` owns the display-independent one-bit
-  framebuffer and raster primitives. Its compact font uses the classic 5x7
-  column format compatible with the bundled Adafruit_GFX font.
-- `Sources/Devices/SSD1306/SSD1306Driver.swift` implements the SSD1306 command/data
-  protocol. Its initialization order is a Swift transform of the SSD1306
-  datasheet and conventional Adafruit_SSD1306 setup flow.
-
-Drawing changes only the framebuffer. Call `flush()` after drawing to send the
-updated image to the OLED.
-
-## DRV8833 motor example
-
-The repository now includes a small DRV8833 driver and sample for brushed DC motors.
-The device is implemented as `DRV8833` in `Sources/Devices/DRV8833/` and the sample entrypoint is `DRV8833Sample` in `Sources/Application/Samples/`.
-
-### Wiring
-
-A simple example uses:
-
-- `AIN1 -> GP6`
-- `AIN2 -> GP7`
-- `BIN1 -> GP8`
-- `BIN2 -> GP9`
-- `nSLEEP -> GP10` (only if your breakout requires it)
-
-Connect the motor supply to the DRV8833 VM pin, the logic supply to 3.3V, and the motor terminals to the H-bridge outputs. The sample drives the motor forward, reverse, and stop states with PWM so you can validate direction and speed behavior on real hardware.
-
 ### Feature highlights
 
-- Signed speed control from `-100` to `100` for forward and reverse motion
-- PWM-based motor drive using the RP2040 PWM peripheral
-- Optional brake and coast stop modes
-- Support for an optional `nSLEEP` pin to wake the H-bridge before driving
-
-## DHT11 sensor example
-
-The repository now includes a small DHT11 driver and sample for the AZ-Delivery KY-015 module.
-The device is implemented as `DHT11` in `Sources/Devices/DHT11/` and the sample entrypoint is `GPIOSample` in `Sources/Application/Samples/`.
-
-### Wiring
-
-Use the sensor with a single data wire plus power and ground:
-
-- Option A: `DHT11 DATA -> GP2`, `VCC -> 3V3(OUT)`, `GND -> GND`
-- Option B: `DHT11 DATA -> GP3`, `VCC -> 3V3(OUT)`, `GND -> GND`
-- Option C: `DHT11 DATA -> GP15`, `VCC -> 3V3(OUT)`, `GND -> GND`
-- Option D: `DHT11 DATA -> GP22`, `VCC -> 3V3(OUT)`, `GND -> GND`
-
-These are the sample options currently documented in `GPIOSample.swift`. On the Raspberry Pi Pico, GP0/GP1 are not recommended because they are used by USB, GP4/GP5 are default I2C pins, and GP6-GP11 are tied to the onboard QSPI flash. GP2 and GP3 are the simplest verified choices from the GP0-GP11 range for this example.
-
-This sensor uses the one-wire DHT11 protocol, so the sample keeps the data line high between reads and pulls it low for the start signal before reading the 40-bit payload.
+- Automatic I2C address detection: tries `0x3C` first, then retries at `0x3D`.
+- `SwiftGFX` framebuffer with text, line, and shape primitives.
+- Drawing accumulates in RAM; call `flush()` to transfer to the display.
+- LED fault indicator: one blink on initialization failure, two blinks on flush failure.
 
 ## Extending with drivers (GPIO, UART, I2C, SPI)
 
@@ -256,44 +348,6 @@ Recommended layering:
    Use high-level driver calls without direct register addresses.
 
 When adding new Swift files, include them in `CMakeLists.txt` under `SWIFT_SOURCES`.
-
-## Example: GPIO usage
-
-A tiny example showing how to configure a GPIO pin for CPU-controlled output,
-toggle it, and how to enable/disable internal pull resistors for an input pin.
-
-```swift
-// Configure pin 25 as a CPU-driven output and set it high/low
-RP2040GPIO.configureAsSIOOutput(pin: 25)
-RP2040GPIO.setHigh(pin: 25)
-// ...delay...
-RP2040GPIO.setLow(pin: 25)
-
-// Configure pin 15 as an input and enable the internal pull-up resistor
-RP2040GPIO.configureAsSIOInput(pin: 15)
-RP2040GPIO.enablePadPullUp(pin: 15)
-
-// Later, disable internal pulls for pin 15
-RP2040GPIO.disablePadPulls(pin: 15)
-```
-
-## Example: PWM demo
-
-The repository includes a small PWM demo that ramps the onboard LED brightness
-using `RP2040PWM`. To build and flash the demo to a Pico:
-
-1. Ensure `PICO_SDK_PATH` is set (run `Scripts/init.sh` once).
-
-2. Build and flash as usual:
-
-```bash
-Scripts/run.sh
-```
-
-The demo is wired to run from the firmware entrypoint (`Main.swift`). It
-attempts to configure PWM on the onboard LED at 1 kHz and ramps duty from
-0–100% and back. If PWM setup fails (e.g. unusual system clock), it falls
-back to a simple blink so you still get visible feedback.
 
 ## Dependency extension with Package.swift
 
