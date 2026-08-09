@@ -38,6 +38,14 @@ struct DRV8833 {
   ///
   /// - Returns: Success when all pins were configured, or the first PWM error.
   func initialize() -> Result<Void, RP2040PWM.PWMError> {
+    // Wake the driver if the breakout exposes nSLEEP.
+    if let sleepPin = configuration.sleepPin {
+      RP2040GPIO.configureAsSIOOutput(pin: sleepPin)
+      RP2040GPIO.setHigh(pin: sleepPin)
+      // Give the bridge a short wake-up time before PWM starts.
+      pico_delay_ms(1)
+    }
+
     switch configureMotorPins(
       in1Pin: configuration.motorAIn1Pin,
       in2Pin: configuration.motorAIn2Pin

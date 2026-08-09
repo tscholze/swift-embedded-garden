@@ -25,6 +25,7 @@ The repository currently includes a few small beginner-friendly samples under th
 - `PWMSample` — configures PWM on the onboard LED and ramps the brightness up and down.
 - `TrafficLight` — demonstrates a simple traffic-light style output sequence and can also use a KY-040 rotary encoder to switch between red, yellow, and green states.
 - `GPIOSample` — reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line.
+- `DRV8833Sample` — drives a brushed DC motor with a DRV8833 dual H-bridge using PWM-based forward/reverse control and optional brake/coast behavior.
 
 You can switch which sample runs by updating the entry point in `Sources/Application/Main.swift`.
 
@@ -192,6 +193,30 @@ the SSD1306 display-off and full initialization command sequence instead.
 
 Drawing changes only the framebuffer. Call `flush()` after drawing to send the
 updated image to the OLED.
+
+## DRV8833 motor example
+
+The repository now includes a small DRV8833 driver and sample for brushed DC motors.
+The device is implemented as `DRV8833` in `Sources/Devices/DRV8833/` and the sample entrypoint is `DRV8833Sample` in `Sources/Application/Samples/`.
+
+### Wiring
+
+A simple example uses:
+
+- `AIN1 -> GP6`
+- `AIN2 -> GP7`
+- `BIN1 -> GP8`
+- `BIN2 -> GP9`
+- `nSLEEP -> GP10` (only if your breakout requires it)
+
+Connect the motor supply to the DRV8833 VM pin, the logic supply to 3.3V, and the motor terminals to the H-bridge outputs. The sample drives the motor forward, reverse, and stop states with PWM so you can validate direction and speed behavior on real hardware.
+
+### Feature highlights
+
+- Signed speed control from `-100` to `100` for forward and reverse motion
+- PWM-based motor drive using the RP2040 PWM peripheral
+- Optional brake and coast stop modes
+- Support for an optional `nSLEEP` pin to wake the H-bridge before driving
 
 ## DHT11 sensor example
 

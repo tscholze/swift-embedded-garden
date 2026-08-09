@@ -5,6 +5,7 @@
 /// - AIN2 -> GP7
 /// - BIN1 -> GP8
 /// - BIN2 -> GP9
+/// - nSLEEP -> GP10 (optional, only if your breakout exposes and requires it)
 ///
 /// Wire the DRV8833 VM pin to the motor supply, VCC to 3.3V logic, and GND to
 /// the Pico ground. Motor A connects to AOUT1/AOUT2, and Motor B connects to
@@ -22,11 +23,13 @@ struct DRV8833Sample {
   /// - Parameter configuration: Wiring used by the sample.
   init(
     configuration: DRV8833Configuration = DRV8833Configuration(
-      motorAIn1Pin: 6,
-      motorAIn2Pin: 7,
+      motorAIn1Pin: 14,
+      motorAIn2Pin: 15,
       motorBIn1Pin: 8,
       motorBIn2Pin: 9,
-      pwmFrequencyHz: 1_000
+      // Set this to a GPIO number only when you wired nSLEEP to the Pico.
+      sleepPin: nil,
+      pwmFrequencyHz: 20_000
     )
   ) {
     self.configuration = configuration
@@ -43,22 +46,18 @@ struct DRV8833Sample {
     }
 
     while true {
-      // Drive the two bridges in opposite directions for a visible demo.
-      driver.setMotorA(speedPercent: 60)
-      driver.setMotorB(speedPercent: -60)
-      pico_delay_ms(1_500)
+      // Drive motor A forward at full power to overcome startup friction.
+      driver.setMotorA(speedPercent: 100)
+      driver.stopMotorB()
+      pico_delay_ms(1_000)
 
       driver.stopAll()
       pico_delay_ms(500)
 
-      // Reverse the motion so both directions are easy to verify.
-      driver.setMotorA(speedPercent: -60)
-      driver.setMotorB(speedPercent: 60)
-      pico_delay_ms(1_500)
-
-      // Use brake mode briefly before the next cycle.
-      driver.stopAll(brake: true)
-      pico_delay_ms(750)
+      // Reverse motor A to verify both directions.
+      driver.setMotorA(speedPercent: -100)
+      driver.stopMotorB()
+      pico_delay_ms(2_000)
     }
   }
 

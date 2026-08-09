@@ -6,6 +6,7 @@ enum RP2040PWM {
   // PWM base address and per-slice offsets (from RP2040 datasheet).
   private static let pwmBase: UInt32 = 0x4005_0000
   private static let pwmSliceStride: UInt32 = 0x14
+  private static let gpioFunctionPWM: UInt32 = 0x4
 
   // Registers inside a slice (offsets from slice base)
   private static let pwmCSROffset: UInt32 = 0x00  // control and status
@@ -28,7 +29,9 @@ enum RP2040PWM {
   /// - Parameter pin: GPIO pin number
   /// - Returns: (slice, channel) where channel is 0 for A, 1 for B
   static func sliceAndChannel(forPin pin: UInt32) -> (UInt32, UInt32) {
-    let slice = pin / 2
+    // RP2040 PWM slices repeat every 16 GPIOs.
+    // Examples: GP0/1 -> slice0, GP14/15 -> slice7, GP16/17 -> slice0.
+    let slice = (pin % 16) / 2
     let channel = pin % 2
     return (slice, channel)
   }
@@ -48,11 +51,11 @@ enum RP2040PWM {
   > {
     let (slice, channel) = sliceAndChannel(forPin: pin)
 
-    // Basic validation: RP2040 has slices 0..7 (for 16 GPIOs pairs up to 30)
-    if slice > 7 { return .failure(.invalidPin) }
+    // RP2040 GPIO range is 0...29.
+    if pin > 29 { return .failure(.invalidPin) }
 
-    // Select PWM function for the pin (funcSel 2 is PWM in RP2040 datasheet)
-    RP2040GPIO.setFunction(pin: pin, funcSel: 2)
+    // Select PWM function for the pin.
+    RP2040GPIO.setFunction(pin: pin, funcSel: gpioFunctionPWM)
 
     // Compute clock divider and TOP to achieve desired frequency.
     // We'll aim for the maximum TOP (65535) to maximize resolution when possible.

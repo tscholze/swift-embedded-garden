@@ -6,7 +6,9 @@
 @_cdecl("swift_main")
 public func swift_main() -> Never {
   // Main and combined sample
-  Sample().run()
+  // Sample().run()
+
+  DRV8833Sample().run()
 
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
   // blink()
