@@ -86,18 +86,12 @@ The script shows a simple TUI with the most important steps printed.
 │   │       ├── MMIO.swift       # Low-level register read/write helpers
 │   │       └── GPIO.swift # RP2040 GPIO driver using MMIO
 │   └── Devices/
-│       ├── SSD1306/
-│       │   ├── SSD1306Driver.swift
-│       │   ├── SSD1306Renderer.swift
-│       │   ├── SSD1306Configuration.swift
-│       │   └── SwiftGFX.swift
+│       ├── Button/
 │       ├── RotaryButton/
-│       │   ├── RotaryButton.swift
-│       │   ├── RotaryButtonController.swift
-│       │   └── RotaryButtonConfiguration.swift
-│       └── DHT11/
-│           ├── DHT11.swift
-│           └── DHT11Configuration.swift
+│       ├── TrafficLight/
+│       ├── DHT11/
+│       ├── SSD1306/
+│       └── DRV8833/
 ├── CMakeLists.txt               # Firmware build orchestration
 └── Package.swift                # Swift package metadata for future dependencies
 ```
