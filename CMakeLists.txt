@@ -82,6 +82,12 @@ target_link_libraries(swift-pico-blink
   hardware_gpio
 )
 
+# When targeting Pico W, link the minimal CYW43 driver (no RTOS, no WiFi) so
+# cyw43_arch_init() and cyw43_arch_gpio_put() are available for the LED.
+if(PICO_BOARD STREQUAL "pico_w")
+  target_link_libraries(swift-pico-blink pico_cyw43_arch_none)
+endif()
+
 target_include_directories(swift-pico-blink PRIVATE
   "${PICO_SDK_PATH}/src/common/pico_stdlib_headers/include"
 )
