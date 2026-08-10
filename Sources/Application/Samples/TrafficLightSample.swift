@@ -7,14 +7,22 @@ struct TrafficLightSample {
 
   // MARK: - Initialization -
 
+  /// Initializes the sample and configures the traffic light pins.
+  /// To run the sample, call the never-returning `run()` method.
+  ///
+  /// - Parameter configuration: The configuration for the traffic light.
   init(configuration: TrafficLightConfiguration) {
     trafficLight = TrafficLight(configuration: configuration)
   }
 
-  // MARK: - Sample -
+  // MARK: - Sample run -
 
   func run() -> Never {
+    // 1. Simple blink
     blinkSequence()
+
+    // 2. Rotary encoder input
+    // blinkWithKnob()
   }
 
   // MARK: - Traffic Light Simulation -

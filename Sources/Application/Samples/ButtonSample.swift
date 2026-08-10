@@ -2,32 +2,38 @@
 ///
 /// The LED is on while the button is pressed and off when released.
 struct ButtonSample {
-  private let ledPin: UInt32
-  private let buttonPin: UInt32
-  private let isActiveHigh: Bool
+  // MARK: - Private properties -
 
-  init(ledPin: UInt32 = 25, buttonPin: UInt32 = 16, isActiveHigh: Bool = true) {
-    self.ledPin = ledPin
+  private let buttonPin: UInt32
+
+  // MARK: - Initialization -
+
+  /// Initializes the sample and configures the button pin.
+  /// To run the sample, call the never-returning `run()` method.
+  ///
+  /// - Parameter buttonPin: The GPIO pin number to which the button is connected.
+  init(buttonPin: UInt32 = 16) {
     self.buttonPin = buttonPin
-    self.isActiveHigh = isActiveHigh
   }
 
-  func run() -> Never {
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
+  // MARK: - Sample -
 
-    var button = Button(
-      configuration: ButtonConfiguration(triggerPin: buttonPin, isActiveHigh: isActiveHigh)
+  func run() -> Never {
+    RP2040GPIO.configureLed()
+
+    let button = Button(
+      configuration: ButtonConfiguration(triggerPin: buttonPin)
     )
 
     while true {
       if button.isPressed() {
-        RP2040GPIO.setHigh(pin: ledPin)
+        RP2040GPIO.setLedHigh()
       } else {
-        RP2040GPIO.setLow(pin: ledPin)
+        RP2040GPIO.setLedLow()
       }
 
       // Small poll delay to avoid busy-looping while keeping responsiveness.
-      pico_delay_ms(5)
+      pico_delay_ms(10)
     }
   }
 }

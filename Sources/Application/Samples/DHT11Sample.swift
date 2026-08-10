@@ -1,13 +1,19 @@
 /// Demonstrates reading values from a DHT11 sensor using GPIO bit-banging.
-struct DHTS11Sample {
+/// A slow blink indicates a successful read, while three quick blinks indicate a failed read.
+struct DHT11Sample {
   // MARK: - GPIO Pin Assignments -
 
-  private let ledPin: UInt32 = 25
   private let sensor: DHT11
 
-  // MARK - Initialization -
+  // MARK: - Initialization -
 
+  /// Initializes the sample and configures the DHT11 sensor pin.
+  /// To run the sample, call the never-returning `run()` method.
+  ///
+  /// - Parameter configuration: The configuration for the DHT11 sensor.
   init(configuration: DHT11Configuration) {
+    RP2040GPIO.configureLed()
+
     sensor = DHT11(configuration: configuration)
     sensor.configure()
   }
@@ -42,10 +48,10 @@ struct DHTS11Sample {
   // MARK: - Private helpers -
 
   private func showSuccess(reading: DHT11Reading) {
-    RP2040GPIO.setHigh(pin: ledPin)
-    pico_delay_ms(200)
-    RP2040GPIO.setLow(pin: ledPin)
-    pico_delay_ms(200)
+    RP2040GPIO.setLedHigh()
+    pico_delay_ms(500)
+    RP2040GPIO.setLedLow()
+    pico_delay_ms(500)
 
     // The reading is valid, so the LED briefly pulses for a successful sample.
     _ = reading.temperatureC
@@ -54,9 +60,9 @@ struct DHTS11Sample {
 
   private func showFailure() {
     for _ in 0..<3 {
-      RP2040GPIO.setHigh(pin: ledPin)
+      RP2040GPIO.setLedHigh()
       pico_delay_ms(80)
-      RP2040GPIO.setLow(pin: ledPin)
+      RP2040GPIO.setLedLow()
       pico_delay_ms(120)
     }
   }

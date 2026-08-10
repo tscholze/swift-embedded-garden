@@ -46,13 +46,13 @@ struct DisplaySample {
   ///
   /// - Parameter blinks: Number of short pulses emitted before each long pause.
   private func displayFaultLoop(blinks: UInt32) -> Never {
-    let ledPin: UInt32 = 25
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
+
+    RP2040GPIO.configureLed()
     while true {
       for _ in 0..<blinks {
-        RP2040GPIO.setHigh(pin: ledPin)
+        RP2040GPIO.setLedHigh()
         pico_delay_ms(120)
-        RP2040GPIO.setLow(pin: ledPin)
+        RP2040GPIO.setLedLow()
         pico_delay_ms(180)
       }
       pico_delay_ms(1_000)

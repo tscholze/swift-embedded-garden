@@ -4,38 +4,43 @@
 class Sample {
   // MARK: - Pin Assignments -
 
-  // The rotary wait blocks the loop, so its timeout also decides how often
-  // the button gets sampled. Keep it short.
-  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15, timeoutMs: 20)
-  private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
   private let dht11c = DHT11Configuration(dataPin: 22)
-  private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
   private let buzzerc = BuzzerConfiguration(triggerPin: 28)
   private let buttonc = ButtonConfiguration(triggerPin: 16)
+  private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
+  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15, timeoutMs: 20)
+  private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
 
   // MARK: - Peripherals -
 
-  private var renderer: SSD1306Renderer!
-  private var display: SSD1306Driver!
-  private var trafficLight: TrafficLight!
-  private var buzzer: Buzzer!
+  private var button: Button
+  private let buzzer: Buzzer
+  private let dht11Sensor: DHT11
+  private let display: SSD1306Driver
+  private let renderer: SSD1306Renderer
+  private let rotaryButton: RotaryButton
+  private let trafficLight: TrafficLight
 
-  // MARK: - Sample -
+  // MARK: - Initialization -
 
-  /// Runs the sample, which demonstrates rotary encoder input,
-  ///  traffic light output, and SSD1306 display rendering.
-  func run() -> Never {
-    // Setup DHT11 sensor
-    let dht11Sensor = DHT11(configuration: dht11c)
-
-    // Setup rotary button
-    let rotaryButton = RotaryButton(configuration: rbc)
+  /// Initializes the sample and configures all peripherals.
+  ///
+  /// To run the sample, call the never-returning `run()` method.
+  init() {
+    // Setup onboard led of the Pico board
+    RP2040GPIO.configureLed()
 
     // Setup button
-    var button = Button(configuration: buttonc)
+    button = Button(configuration: buttonc)
 
     // Setup buzzer
     buzzer = Buzzer(configuration: buzzerc)
+
+    // Setup DHT11 sensor
+    dht11Sensor = DHT11(configuration: dht11c)
+
+    // Setup rotary button
+    rotaryButton = RotaryButton(configuration: rbc)
 
     // Setup traffic light
     trafficLight = TrafficLight(configuration: tlc)
@@ -43,14 +48,20 @@ class Sample {
     // Setup display
     display = SSD1306Driver(configuration: ssd1306c)
 
+    // Configure renderer
+    renderer = SSD1306Renderer(display: display)
+  }
+
+  // MARK: - Sample -
+
+  /// Runs the sample, which demonstrates rotary encoder input,
+  ///  traffic light output, and SSD1306 display rendering.
+  func run() -> Never {
     // Initialize the display and check for errors.
     // If initialization fails, enter a fault loop.
     if case .failure = display.initialize() {
       displayFaultLoop(blinks: 1)
     }
-
-    // Configure renderer
-    renderer = SSD1306Renderer(display: display)
 
     // The onboard LED is used as a cycle indicator.
     RP2040GPIO.configureAsSIOOutput(pin: 25)
@@ -169,13 +180,11 @@ class Sample {
   ///
   /// - Parameter blinks: Number of short pulses emitted before each long pause.
   private func displayFaultLoop(blinks: UInt32) -> Never {
-    let ledPin: UInt32 = 25
-    RP2040GPIO.configureAsSIOOutput(pin: ledPin)
     while true {
       for _ in 0..<blinks {
-        RP2040GPIO.setHigh(pin: ledPin)
+        RP2040GPIO.setLedHigh()
         pico_delay_ms(120)
-        RP2040GPIO.setLow(pin: ledPin)
+        RP2040GPIO.setLedLow()
         pico_delay_ms(180)
       }
       pico_delay_ms(1_000)
