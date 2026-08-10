@@ -8,10 +8,10 @@ public func swift_main() -> Never {
   // Main and combined sample
   // Sample().run()
 
-  DRV8833Sample().run()
+  //DRV8833Sample().run()
 
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
-  // blink()
+  blink()
 
   // 2. Blink a traffic light sequence using GPIO15, GPIO14, and GPIO12.
   // blinkTrafficLight()
@@ -39,13 +39,12 @@ public func swift_main() -> Never {
 
 /// Blinks the RP2040 Pico onboard LED forever for a minimal GPIO smoke test.
 private func blink() -> Never {
-  let ledPin: UInt32 = 25
-  RP2040GPIO.configureAsSIOOutput(pin: ledPin)
+  RP2040GPIO.configureLed()
 
   while true {
-    RP2040GPIO.setHigh(pin: ledPin)
+    RP2040GPIO.setLedHigh()
     pico_delay_ms(500)
-    RP2040GPIO.setLow(pin: ledPin)
+    RP2040GPIO.setLedLow()
     pico_delay_ms(500)
   }
 }

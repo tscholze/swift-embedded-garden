@@ -498,6 +498,49 @@ enum RP2040GPIO {
     return micros() &- start
   }
 
+  // MARK: - Board LED helpers -
+
+  /// Initialise the on-board LED so it is ready to use.
+  ///
+  /// On **Pico** this configures GPIO 25 as a SIO output.
+  /// On **Pico W** this initialises the CYW43 wireless chip via
+  /// `cyw43_arch_init()` so its GPIO expander is ready.
+  ///
+  /// Call once at startup before any `writeLed`, `setLedHigh`, or
+  /// `setLedLow` call.
+  @inline(__always)
+  static func configureLed() {
+    pico_board_led_init()
+  }
+
+  /// Drive the on-board LED high (on).
+  ///
+  /// On **Pico** this sets GPIO 25 high through the SIO block.
+  /// On **Pico W** this calls `cyw43_arch_gpio_put` to turn the CYW43
+  /// LED on.
+  @inline(__always)
+  static func setLedHigh() {
+    pico_board_led_set(true)
+  }
+
+  /// Drive the on-board LED low (off).
+  ///
+  /// On **Pico** this sets GPIO 25 low through the SIO block.
+  /// On **Pico W** this calls `cyw43_arch_gpio_put` to turn the CYW43
+  /// LED off.
+  @inline(__always)
+  static func setLedLow() {
+    pico_board_led_set(false)
+  }
+
+  /// Drive the on-board LED to an explicit level.
+  ///
+  /// - Parameter high: `true` turns the LED on, `false` turns it off.
+  @inline(__always)
+  static func writeLed(high: Bool) {
+    pico_board_led_set(high)
+  }
+
   // MARK: - Deprecated -
 
   /// Configure a GPIO pin for the RP2040's I2C peripheral.
@@ -512,3 +555,16 @@ enum RP2040GPIO {
     configureAsSIOInput(pin: pin)
   }
 }
+
+// MARK: - C bridge declarations for board LED helpers -
+
+/// Initialises the on-board LED via the C bootstrap.
+/// Implemented in CMake/bootstrap.c; branches at compile time between
+/// a raw GPIO output (Pico) and the CYW43 driver (Pico W).
+@_silgen_name("pico_board_led_init")
+func pico_board_led_init()
+
+/// Sets the on-board LED state via the C bootstrap.
+/// Implemented in CMake/bootstrap.c; routes to GPIO or CYW43 as needed.
+@_silgen_name("pico_board_led_set")
+func pico_board_led_set(_ on: Bool)
