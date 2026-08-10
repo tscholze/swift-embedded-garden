@@ -19,17 +19,17 @@ If you are looking for the single-file-based generator to setup your own Swift e
 
 ## Samples
 
-The repository currently includes a few small beginner-friendly samples under the application layer:
+The repository currently includes a few small beginner-friendly samples under the application folder (`Sources/Application/Samples`):
 
 | Sample | Source file | Description |
 |---|---|---|
-| `GPIOSample` | `Sources/Application/Samples/GPIOSample.swift` | Configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors. |
-| `ButtonSample` | `Sources/Application/Samples/ButtonSample.swift` | Turns the onboard LED on while a button is held and off when released. |
-| `BuzzerSample` | `Sources/Application/Samples/BuzzerSample.swift` | Triggers a passive buzzer on a GPIO pin at a timed interval. |
-| `TrafficLightSample` | `Sources/Application/Samples/TrafficLightSample.swift` | Drives a three-LED traffic light sequence and optionally reads a KY-040 rotary encoder to select the active light. |
-| `DHTS11Sample` | `Sources/Application/Samples/DHT11Sample.swift` | Reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line. |
-| `DRV8833Sample` | `Sources/Application/Samples/DRV8833Sample.swift` | Drives a brushed DC motor with a DRV8833 dual H-bridge using PWM-based forward/reverse control and optional brake/coast behavior. |
-| `DisplaySample` | `Sources/Application/Samples/DisplaySample.swift` | Initializes an Elegoo 0.96-inch SSD1306 OLED over I2C and draws text and graphics into a framebuffer. |
+| `GPIOSample` | `Samples/GPIOSample.swift` | Configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors. |
+| `ButtonSample` | `Samples/ButtonSample.swift` | Turns the onboard LED on while a button is held and off when released. |
+| `BuzzerSample` | `Samples/BuzzerSample.swift` | Triggers a passive buzzer on a GPIO pin at a timed interval. |
+| `TrafficLightSample` | `Samples/TrafficLightSample.swift` | Drives a three-LED traffic light sequence and optionally reads a KY-040 rotary encoder to select the active light. |
+| `DHTS11Sample` | `Samples/DHT11Sample.swift` | Reads temperature and humidity from an AZ-Delivery KY-015 DHT11 sensor over a single GPIO data line. |
+| `DRV8833Sample` | `Samples/DRV8833Sample.swift` | Drives a brushed DC motor with a DRV8833 dual H-bridge using PWM-based forward/reverse control and optional brake/coast behavior. |
+| `DisplaySample` | `Samples/DisplaySample.swift` | Initializes an Elegoo 0.96-inch SSD1306 OLED over I2C and draws text and graphics into a framebuffer. |
 
 You can switch which sample runs by updating the entry point in `Sources/Application/Main.swift`.
 
