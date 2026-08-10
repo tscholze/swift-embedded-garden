@@ -20,6 +20,11 @@ if(NOT PICO_SDK_PATH)
   message(FATAL_ERROR "PICO_SDK_PATH is not set. Run Scripts/init.sh first.")
 endif()
 
+# Board target. Use Scripts/switch.sh to change between pico and pico_w.
+if(NOT DEFINED PICO_BOARD)
+  set(PICO_BOARD pico)
+endif()
+
 include("${PICO_SDK_PATH}/external/pico_sdk_import.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/CMake/SwiftEmbedded.cmake")
 

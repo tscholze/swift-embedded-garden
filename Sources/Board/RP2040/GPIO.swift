@@ -498,6 +498,17 @@ enum RP2040GPIO {
     return micros() &- start
   }
 
+  // MARK: - Board pin constants -
+
+  /// GPIO pin number of the on-board LED for the Raspberry Pi Pico.
+  ///
+  /// On the **Pico** this is GPIO 25, a regular SIO-addressable output.
+  /// On the **Pico W** the on-board LED is wired to the CYW43 wireless chip
+  /// and is not reachable through normal GPIO MMIO. The virtual pin number
+  /// used by the Pico SDK for that chip is 32. `Scripts/switch.sh` updates
+  /// this constant automatically when you switch between board targets.
+  static let internalLedPin: UInt32 = 25
+
   // MARK: - Deprecated -
 
   /// Configure a GPIO pin for the RP2040's I2C peripheral.
