@@ -6,12 +6,10 @@
 @_cdecl("swift_main")
 public func swift_main() -> Never {
   // Main and combined sample
-  // Sample().run()
-
-  //DRV8833Sample().run()
+  Sample().run()
 
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
-  blink()
+  // blink()
 
   // 2. Blink a traffic light sequence using GPIO15, GPIO14, and GPIO12.
   // blinkTrafficLight()
@@ -48,42 +46,3 @@ private func blink() -> Never {
     pico_delay_ms(500)
   }
 }
-
-/// Blinks a traffic-light sequence using GPIO15, GPIO14, and GPIO12.
-private func blinkTrafficLight() -> Never {
-  let redPin = UInt32(15)
-  let yellowPin = UInt32(14)
-  let greenPin = UInt32(12)
-
-  RP2040GPIO.configureAsSIOOutput(pin: redPin)
-  RP2040GPIO.configureAsSIOOutput(pin: yellowPin)
-  RP2040GPIO.configureAsSIOOutput(pin: greenPin)
-
-  while true {
-    // Red on, others off
-    RP2040GPIO.setHigh(pin: redPin)
-    RP2040GPIO.setLow(pin: yellowPin)
-    RP2040GPIO.setLow(pin: greenPin)
-    pico_delay_ms(5000)
-
-    // Yellow on, others off
-    RP2040GPIO.setLow(pin: redPin)
-    RP2040GPIO.setHigh(pin: yellowPin)
-    RP2040GPIO.setLow(pin: greenPin)
-    pico_delay_ms(2000)
-
-    // Green on, others off
-    RP2040GPIO.setLow(pin: redPin)
-    RP2040GPIO.setLow(pin: yellowPin)
-    RP2040GPIO.setHigh(pin: greenPin)
-    pico_delay_ms(5000)
-  }
-}
-
-/// Imports the Pico SDK-backed millisecond delay from the C bootstrap.
-@_silgen_name("pico_delay_ms")
-func pico_delay_ms(_ ms: UInt32)
-
-/// Imports the Pico SDK-backed microsecond delay from the C bootstrap.
-@_silgen_name("pico_delay_us")
-func pico_delay_us(_ us: UInt32)

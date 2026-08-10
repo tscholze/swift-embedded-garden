@@ -568,3 +568,11 @@ func pico_board_led_init()
 /// Implemented in CMake/bootstrap.c; routes to GPIO or CYW43 as needed.
 @_silgen_name("pico_board_led_set")
 func pico_board_led_set(_ on: Bool)
+
+/// Imports the Pico SDK-backed millisecond delay from the C bootstrap.
+@_silgen_name("pico_delay_ms")
+func pico_delay_ms(_ ms: UInt32)
+
+/// Imports the Pico SDK-backed microsecond delay from the C bootstrap.
+@_silgen_name("pico_delay_us")
+func pico_delay_us(_ us: UInt32)
