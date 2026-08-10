@@ -540,20 +540,6 @@ enum RP2040GPIO {
   static func writeLed(high: Bool) {
     pico_board_led_set(high)
   }
-
-  // MARK: - Deprecated -
-
-  /// Configure a GPIO pin for the RP2040's I2C peripheral.
-  @available(*, deprecated, renamed: "configureAsI2C(pin:enablePullUp:)")
-  static func configureAsI2C1(pin: UInt32, enablePullUp: Bool = true) {
-    configureAsI2C(pin: pin, enablePullUp: enablePullUp)
-  }
-
-  /// Typo-tolerant alias for `configureAsSIOInput`.
-  @available(*, deprecated, renamed: "configureAsSIOInput(pin:pull:)")
-  static func configureAsSIInput(pin: UInt32) {
-    configureAsSIOInput(pin: pin)
-  }
 }
 
 // MARK: - C bridge declarations for board LED helpers -
