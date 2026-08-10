@@ -24,7 +24,6 @@ The repository currently includes a few small beginner-friendly samples under th
 | Sample | Source file | Description |
 |---|---|---|
 | `GPIOSample` | `Sources/Application/Samples/GPIOSample.swift` | Configures a GPIO pin as an output, toggles the onboard LED, and demonstrates input reading with pull-up resistors. |
-| `PWMSample` | `Sources/Application/Samples/PWMSample.swift` | Configures PWM on the onboard LED and ramps the brightness up and down. |
 | `ButtonSample` | `Sources/Application/Samples/ButtonSample.swift` | Turns the onboard LED on while a button is held and off when released. |
 | `BuzzerSample` | `Sources/Application/Samples/BuzzerSample.swift` | Triggers a passive buzzer on a GPIO pin at a timed interval. |
 | `TrafficLightSample` | `Sources/Application/Samples/TrafficLightSample.swift` | Drives a three-LED traffic light sequence and optionally reads a KY-040 rotary encoder to select the active light. |
@@ -36,30 +35,7 @@ You can switch which sample runs by updating the entry point in `Sources/Applica
 
 ## One-file project generator
 
-If you want to create a fresh standalone project from a single file, use:
-
-```bash
-./generate-swift-pico-project.sh
-```
-
-It supports interactive prompts plus optional flags for automation:
-
-```bash
-./generate-swift-pico-project.sh \
-  --project-name MyPicoBlink \
-  --output-dir ./MyPicoBlink \
-  --target-name my-pico-blink \
-  --pico-sdk-ref master \
-  --swiftly-channel main-snapshot \
-  --no-include-ci \
-  --post-action none
-```
-
-Helpful options:
-
-- `--non-interactive` for CI/scripting
-- `--force` to allow non-empty output directories
-- `--post-action init|build|none|ask` to control auto-run behavior after generation
+The one-bash-file generator has been moved to it's own stable repository called '[swift-embedded-garden-generator](https://github.com/tscholze/swift-embedded-garden-generator)'.
 
 ## Look and feel
 
@@ -84,7 +60,7 @@ The script shows a simple TUI with the most important steps printed.
 │   ├── Board/
 │   │   └── RP2040/
 │   │       ├── MMIO.swift       # Low-level register read/write helpers
-│   │       └── GPIO.swift # RP2040 GPIO driver using MMIO
+│   │       └── GPIO.swift       # RP2040 GPIO driver using MMIO
 │   └── Devices/
 │       ├── Button/
 │       ├── RotaryButton/
@@ -176,23 +152,6 @@ The device is implemented in `Sources/Board/RP2040/GPIO.swift` and the sample en
 - Configure a GPIO pin as a CPU-controlled output and toggle it high/low.
 - Configure a GPIO pin as an input and enable the internal pull-up resistor.
 - Read the current level of an input pin to detect external signals.
-
-## PWM sample
-
-The `PWMSample` ramps the onboard LED brightness up and down using the RP2040 PWM peripheral.
-The device is implemented in `Sources/Board/RP2040/PWM.swift` and the sample entrypoint is `PWMSample` in `Sources/Application/Samples/`.
-
-### Wiring
-
-| Signal | Raspberry Pi Pico pin |
-| --- | --- |
-| Onboard LED | GP25 (built-in) |
-
-### Feature highlights
-
-- Configure a PWM channel at 1 kHz on any GPIO pin.
-- Ramp duty cycle from 0 % to 100 % and back for a smooth LED breath effect.
-- Falls back to a simple GPIO blink if PWM setup fails.
 
 ## Button sample
 

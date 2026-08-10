@@ -11,12 +11,6 @@ public func swift_main() -> Never {
   // 1. Blink onboard LED (GPIO 25) at 2Hz.
   // blink()
 
-  // 2. Blink a traffic light sequence using GPIO15, GPIO14, and GPIO12.
-  // blinkTrafficLight()
-
-  // 3. Ramp LED brightness using RP2040PWM helpers.
-  // PWMSample().run()
-
   // 4. Demonstrate rotary encoder input with a traffic light output.
   // Sample().run()
 
@@ -24,13 +18,16 @@ public func swift_main() -> Never {
   // GPIOSample().run()
 
   // 6. Demonstrate buzzer.
-  //BuzzerSample().run()
+  // BuzzerSample().run()
 
   // 7. Keep onboard LED on while button is pressed.
   // ButtonSample().run()
 
   // 8. Demonstrate the DRV8833 dual H-bridge driver.
   // DRV8833Sample().run()
+
+  // 9. DHT11 sample with LED feedback for success/failure.
+  // DHT11Sample().run()
 }
 
 // MARK: - Samples -
