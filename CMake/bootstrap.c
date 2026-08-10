@@ -8,10 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// On Pico W the on-board LED is wired to the CYW43 wireless chip.
-// pico_cyw43_arch_none is linked by CMakeLists.txt when PICO_BOARD=pico_w,
-// which defines PICO_CYW43_SUPPORTED and provides the cyw43_arch_* API.
-#if defined(PICO_CYW43_SUPPORTED)
+// RASPBERRYPI_PICO_W is a plain #define in the board header, always reachable via pico/stdlib.h.
+#if defined(RASPBERRYPI_PICO_W)
 #include "pico/cyw43_arch.h"
 #endif
 
@@ -58,7 +56,7 @@ void rp2040_mmio_write(uint32_t address, uint32_t value) {
 //            so its GPIO expander is ready to use.
 // Call once before any pico_board_led_set() call.
 void pico_board_led_init(void) {
-#if defined(PICO_CYW43_SUPPORTED)
+#if defined(RASPBERRYPI_PICO_W)
     cyw43_arch_init();
 #else
     gpio_init(PICO_DEFAULT_LED_PIN);
@@ -70,7 +68,7 @@ void pico_board_led_init(void) {
 // On Pico:   drives GPIO 25 directly through the SIO block.
 // On Pico W: forwards the request to the CYW43 GPIO expander.
 void pico_board_led_set(bool on) {
-#if defined(PICO_CYW43_SUPPORTED)
+#if defined(RASPBERRYPI_PICO_W)
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
 #else
     gpio_put(PICO_DEFAULT_LED_PIN, on);

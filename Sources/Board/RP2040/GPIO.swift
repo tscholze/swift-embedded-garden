@@ -511,7 +511,7 @@ enum RP2040GPIO {
   /// Prefer `configureLed()` / `writeLed(high:)` / `setLedHigh()` /
   /// `setLedLow()` instead of using this pin number directly: those helpers
   /// route through the C bootstrap and work correctly on both Pico and Pico W.
-  static let internalLedPin: UInt32 = 25
+  static let internalLedPin: UInt32 = 32
 
   // MARK: - Board LED helpers -
 
