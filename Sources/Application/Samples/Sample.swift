@@ -8,8 +8,6 @@ class Sample {
   private let buzzerc = BuzzerConfiguration(triggerPin: 28)
   private let buttonc = ButtonConfiguration(triggerPin: 16)
   private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
-  private let rbc = RotaryButtonConfiguration(dtPin: 14, clkPin: 15, timeoutMs: 20)
-  private let tlc = TrafficLightConfiguration(redPin: 2, yellowPin: 3, greenPin: 4)
 
   // MARK: - Peripherals -
 
@@ -40,10 +38,10 @@ class Sample {
     dht11Sensor = DHT11(configuration: dht11c)
 
     // Setup rotary button
-    rotaryButton = RotaryButton(configuration: rbc)
+    rotaryButton = RotaryButton(configuration: .default)
 
     // Setup traffic light
-    trafficLight = TrafficLight(configuration: tlc)
+    trafficLight = TrafficLight(configuration: .default)
 
     // Setup display
     display = SSD1306Driver(configuration: ssd1306c)

@@ -24,4 +24,11 @@ struct RotaryButtonConfiguration {
     self.debounceMs = debounceMs
     self.timeoutMs = timeoutMs
   }
+
+  /// Default configuration for the rotary button / encoder used by the sample.
+  static let `default` = RotaryButtonConfiguration(
+    dtPin: 14,
+    clkPin: 15,
+    timeoutMs: 20
+  )
 }

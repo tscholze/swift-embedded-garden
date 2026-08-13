@@ -156,4 +156,10 @@ struct TrafficLightConfiguration {
   let redPin: UInt32
   let yellowPin: UInt32
   let greenPin: UInt32
+
+  static let `default` = TrafficLightConfiguration(
+    redPin: 2,
+    yellowPin: 3,
+    greenPin: 4
+  )
 }
