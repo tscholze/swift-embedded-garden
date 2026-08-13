@@ -1,12 +1,12 @@
 /// A display renderer with convenient formatting helpers that operate on the
 /// caller's display instance directly.
 struct SSD1306Renderer {
-  private let display: SSD1306Driver
+  private let display: SSD1306
 
   /// Initializes a renderer with the provided display instance.
   ///
   /// - Parameter display: The display instance to render into.
-  init(display: SSD1306Driver) {
+  init(display: SSD1306) {
     self.display = display
   }
 
@@ -106,7 +106,7 @@ enum TrafficLightColor: Int {
   case off = 3
 }
 
-extension SSD1306Driver {
+extension SSD1306 {
   fileprivate func drawNumber(
     _ value: Int, suffix: StaticString? = nil, color: SwiftGFX.Color = .on
   ) {

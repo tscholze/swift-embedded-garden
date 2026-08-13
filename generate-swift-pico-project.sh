@@ -338,7 +338,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/GPIOSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/PWMSample.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DisplaySample.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Renderer.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Configuration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SwiftGFX.swift"
@@ -593,8 +593,8 @@ struct SSD1306Configuration {
 }
 TEMPLATE_SSD1306_CONFIG
 
-  emit_template "${OUTPUT_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift" <<'TEMPLATE_SSD1306_DRIVER'
-struct SSD1306Driver {
+  emit_template "${OUTPUT_DIR}/Sources/Devices/SSD1306/SSD1306.swift" <<'TEMPLATE_SSD1306_DRIVER'
+struct SSD1306 {
   func run() {
     print("SSD1306 driver")
   }

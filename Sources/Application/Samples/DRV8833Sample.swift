@@ -14,7 +14,7 @@ struct DRV8833Sample {
   // MARK: - Wiring -
 
   /// Wiring used by the sample.
-  private let configuration: DRV8833Configuration
+  private let configuration: DRV8833.Configuration
 
   // MARK: - Initialization -
 
@@ -22,7 +22,7 @@ struct DRV8833Sample {
   ///
   /// - Parameter configuration: Wiring used by the sample.
   init(
-    configuration: DRV8833Configuration = DRV8833Configuration(
+    configuration: DRV8833.Configuration = DRV8833.Configuration(
       motorAIn1Pin: 14,
       motorAIn2Pin: 15,
       motorBIn1Pin: 8,

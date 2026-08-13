@@ -11,7 +11,7 @@ struct DHT11Sample {
   /// To run the sample, call the never-returning `run()` method.
   ///
   /// - Parameter configuration: The configuration for the DHT11 sensor.
-  init(configuration: DHT11Configuration) {
+  init(configuration: DHT11.Configuration) {
     RP2040GPIO.configureLed()
 
     sensor = DHT11(configuration: configuration)

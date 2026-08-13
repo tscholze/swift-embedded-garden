@@ -3,11 +3,13 @@ struct DHT11 {
   // MARK: - Internal properties -
 
   /// Configuration for the DHT11 sensor.
-  let configuration: DHT11Configuration
+  let configuration: DHT11.Configuration
 
   // MARK: - Initialization -
 
-  init(configuration: DHT11Configuration) {
+  ///
+  /// - Parameter configuration:
+  init(configuration: DHT11.Configuration) {
     self.configuration = configuration
     configure()
   }

@@ -11,7 +11,7 @@ struct BuzzerSample {
   func run() -> Never {
 
     let buzzer = Buzzer(
-      configuration: BuzzerConfiguration(triggerPin: triggerPin)
+      configuration: Buzzer.Configuration(triggerPin: triggerPin)
     )
 
     while true {

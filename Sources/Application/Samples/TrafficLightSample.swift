@@ -11,7 +11,7 @@ struct TrafficLightSample {
   /// To run the sample, call the never-returning `run()` method.
   ///
   /// - Parameter configuration: The configuration for the traffic light.
-  init(configuration: TrafficLightConfiguration) {
+  init(configuration: TrafficLight.Configuration) {
     trafficLight = TrafficLight(configuration: configuration)
   }
 

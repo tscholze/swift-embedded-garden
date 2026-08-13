@@ -201,9 +201,9 @@ The device is implemented as `TrafficLight` in `Sources/Devices/TrafficLight/` a
 
 | Signal | Raspberry Pi Pico pin |
 | --- | --- |
-| Red LED | Configurable via `TrafficLightConfiguration` |
-| Yellow LED | Configurable via `TrafficLightConfiguration` |
-| Green LED | Configurable via `TrafficLightConfiguration` |
+| Red LED | Configurable via `TrafficLight.Configuration` |
+| Yellow LED | Configurable via `TrafficLight.Configuration` |
+| Green LED | Configurable via `TrafficLight.Configuration` |
 | KY-040 DT (optional) | GP14 |
 | KY-040 CLK (optional) | GP15 |
 | KY-040 SW (optional) | GP13 |
@@ -263,7 +263,7 @@ Connect the DRV8833 VM pin to the motor supply, VCC to 3.3V logic, GND to Pico g
 ## SSD1306 OLED display sample
 
 The `DisplaySample` initializes an Elegoo 0.96-inch 128x64 SSD1306 OLED over I2C and renders text and graphics into a 1,024-byte framebuffer.
-The device is implemented as `SSD1306Driver` in `Sources/Devices/SSD1306/` and the sample entrypoint is `DisplaySample` in `Sources/Application/Samples/`.
+The device is implemented as `SSD1306` in `Sources/Devices/SSD1306/` and the sample entrypoint is `DisplaySample` in `Sources/Application/Samples/`.
 
 ### Wiring
 

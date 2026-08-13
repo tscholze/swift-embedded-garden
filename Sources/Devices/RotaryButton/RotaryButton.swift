@@ -1,9 +1,12 @@
 /// High-level wrapper for the rotary button device abstraction.
 struct RotaryButton {
-  private let configuration: RotaryButtonConfiguration
+  // MARK: - Private properties -
+  private let configuration: Configuration
 
   /// Creates a controller for the supplied rotary-button configuration.
-  init(configuration: RotaryButtonConfiguration) {
+  ///
+  /// - Parameter configuration: The rotary button configuration to use.
+  init(configuration: Configuration) {
     self.configuration = configuration
     configure()
   }

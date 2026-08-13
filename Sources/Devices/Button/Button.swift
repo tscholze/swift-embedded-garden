@@ -2,7 +2,7 @@
 /// actions in the application.
 struct Button {
   // MARK: - Private properties -
-  private let configuration: ButtonConfiguration
+  private let configuration: Configuration
 
   /// Pressed state seen during the previous `wasPressed()` call.
   private var lastPressed: Bool
@@ -12,7 +12,7 @@ struct Button {
   /// Creates a new button for given configuration
   ///
   /// - Parameter configuration: Settings that shall be used
-  init(configuration: ButtonConfiguration) {
+  init(configuration: Configuration) {
     self.configuration = configuration
     self.lastPressed = false
     configure()
@@ -47,25 +47,42 @@ struct Button {
     RP2040GPIO.configureAsSIOInput(pin: configuration.triggerPin, pull: pull)
   }
 
-  private static func readPressed(_ configuration: ButtonConfiguration) -> Bool {
+  private static func readPressed(_ configuration: Configuration) -> Bool {
     return RP2040GPIO.read(pin: configuration.triggerPin) == configuration.isActiveHigh
   }
 }
 
-/// A configuration for a button.
-struct ButtonConfiguration {
-  /// The GPIO pin that is used to trigger the button.
-  let triggerPin: UInt32
+// MARK: - Configuration -
 
-  /// Whether a press drives the trigger pin high.
-  ///
-  /// The KY-004 switches the pin to VCC and carries a pull-down, so it is
-  /// active high. A bare switch against GND, or the KY-040's SW pin, is not.
-  let isActiveHigh: Bool
+extension Button {
+  /// A configuration for a button.
+  struct Configuration {
+    // MARK: - Internal properties -
 
-  /// Creates a button configuration.
-  init(triggerPin: UInt32, isActiveHigh: Bool = true) {
-    self.triggerPin = triggerPin
-    self.isActiveHigh = isActiveHigh
+    /// The GPIO pin that is used to trigger the button.
+    let triggerPin: UInt32
+
+    /// Whether a press drives the trigger pin high.
+    ///
+    /// The KY-004 switches the pin to VCC and carries a pull-down, so it is
+    /// active high. A bare switch against GND, or the KY-040's SW pin, is not.
+    let isActiveHigh: Bool
+
+    // MARK: - Initialization -
+
+    /// Creates a button configuration.
+    ///
+    /// - Parameters:
+    ///  - triggerPin: The GPIO pin that is used to trigger the button.
+    /// - isActiveHigh: Whether a press drives the trigger pin high.
+    init(triggerPin: UInt32, isActiveHigh: Bool = true) {
+      self.triggerPin = triggerPin
+      self.isActiveHigh = isActiveHigh
+    }
+
+    // MARK: - Constants -
+
+    /// Default configuration for the button used by the sample.
+    static let `default` = Configuration(triggerPin: 13, isActiveHigh: true)
   }
 }

@@ -10,7 +10,7 @@ struct TrafficLight {
 
   // MARK: - Initialization -
 
-  init(configuration: TrafficLightConfiguration) {
+  init(configuration: TrafficLight.Configuration) {
     self.ledPin = 25
     self.redPin = configuration.redPin
     self.yellowPin = configuration.yellowPin
@@ -152,14 +152,27 @@ struct TrafficLight {
   }
 }
 
-struct TrafficLightConfiguration {
-  let redPin: UInt32
-  let yellowPin: UInt32
-  let greenPin: UInt32
+// MARK: - Configuration -
 
-  static let `default` = TrafficLightConfiguration(
-    redPin: 2,
-    yellowPin: 3,
-    greenPin: 4
-  )
+extension TrafficLight {
+  /// Configuration for a traffic light simulation.
+  struct Configuration {
+    // MARK: - Internal properties -
+
+    /// GPIO pin for the red light.
+    let redPin: UInt32
+    /// GPIO pin for the yellow light.
+    let yellowPin: UInt32
+    /// GPIO pin for the green light.
+    let greenPin: UInt32
+
+    // MARK: - Constants -
+
+    /// Default configuration for the traffic light used by the sample.
+    static let `default` = TrafficLight.Configuration(
+      redPin: 2,
+      yellowPin: 3,
+      greenPin: 4
+    )
+  }
 }

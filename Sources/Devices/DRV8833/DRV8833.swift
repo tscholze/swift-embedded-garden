@@ -9,14 +9,14 @@ struct DRV8833 {
   // MARK: - Private properties -
 
   /// Wiring and PWM frequency used by the driver instance.
-  private let configuration: DRV8833Configuration
+  private let configuration: Configuration
 
   // MARK: - Initialization -
 
   /// Creates a driver for the supplied wiring configuration.
   ///
   /// - Parameter configuration: GPIO and PWM settings for the H-bridge.
-  init(configuration: DRV8833Configuration) {
+  init(configuration: Configuration) {
     self.configuration = configuration
   }
 

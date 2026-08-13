@@ -3,7 +3,7 @@
 /// The command sequence is a Swift transform of the SSD1306 datasheet flow
 /// and the conventional Adafruit_SSD1306 setup for a 128x64, charge-pump I2C
 /// module. It is protocol compatibility code, not a novel controller design.
-final class SSD1306Driver {
+final class SSD1306 {
   /// SSD1306 control byte indicating a following command stream.
   private static let commandControl: UInt8 = 0x00
 
@@ -14,13 +14,13 @@ final class SSD1306Driver {
   private static let transferPayloadSize = 15
 
   /// Board-level transport and display-address configuration.
-  private let configuration: SSD1306Configuration
+  private let configuration: SSD1306.Configuration
 
   /// The display-independent canvas whose bytes are flushed to the controller.
   private(set) var graphics = SwiftGFX()
 
   /// Creates a driver using the provided board wiring configuration.
-  init(configuration: SSD1306Configuration = SSD1306Configuration()) {
+  init(configuration: SSD1306.Configuration = SSD1306.Configuration()) {
     self.configuration = configuration
   }
 

@@ -1,6 +1,5 @@
 /// A simple buzzer device that can be controlled via a GPIO pin.
 struct Buzzer {
-
   //MARK: - Pin assignments -
 
   private let pin: UInt32
@@ -9,7 +8,7 @@ struct Buzzer {
   /// the specified configuration.
   ///
   /// - Parameter configuration: Configuration object containing the trigger pin for the buzzer.
-  init(configuration: BuzzerConfiguration) {
+  init(configuration: Configuration) {
     self.pin = configuration.triggerPin
     configure()
   }
@@ -32,7 +31,20 @@ struct Buzzer {
   }
 }
 
-/// Configuration object for the Buzzer device.
-struct BuzzerConfiguration {
-  let triggerPin: UInt32
+// MARK: - Configuration -
+
+extension Buzzer {
+  /// Default configuration for the buzzer used by the sample.
+  struct Configuration {
+
+    // MARK: - Internal properties -
+
+    /// Pin that triggers the buzzer. The buzzer is active when the pin is set to high.
+    let triggerPin: UInt32
+
+    // MARK: - Constants -
+
+    /// Default configuration for the buzzer used by the sample.
+    static let `default` = Configuration(triggerPin: 12)
+  }
 }

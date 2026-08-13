@@ -4,17 +4,17 @@
 class Sample {
   // MARK: - Pin Assignments -
 
-  private let dht11c = DHT11Configuration(dataPin: 22)
-  private let buzzerc = BuzzerConfiguration(triggerPin: 28)
-  private let buttonc = ButtonConfiguration(triggerPin: 16)
-  private let ssd1306c = SSD1306Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
+  private let dht11c = DHT11.Configuration(dataPin: 22)
+  private let buzzerc = Buzzer.Configuration(triggerPin: 28)
+  private let buttonc = Button.Configuration(triggerPin: 16)
+  private let ssd1306c = SSD1306.Configuration(i2cAddress: 0x3c, sdaPin: 12, sclPin: 13)
 
   // MARK: - Peripherals -
 
   private var button: Button
   private let buzzer: Buzzer
   private let dht11Sensor: DHT11
-  private let display: SSD1306Driver
+  private let display: SSD1306
   private let renderer: SSD1306Renderer
   private let rotaryButton: RotaryButton
   private let trafficLight: TrafficLight
@@ -44,7 +44,7 @@ class Sample {
     trafficLight = TrafficLight(configuration: .default)
 
     // Setup display
-    display = SSD1306Driver(configuration: ssd1306c)
+    display = SSD1306(configuration: ssd1306c)
 
     // Configure renderer
     renderer = SSD1306Renderer(display: display)

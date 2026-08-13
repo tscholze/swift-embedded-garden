@@ -45,7 +45,7 @@ set(SWIFT_SOURCES
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Application/Samples/DRV8833Sample.swift"
 
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/TrafficLight/TrafficLight.swift"
-  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Driver.swift"
+  "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Renderer.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SSD1306Configuration.swift"
   "${CMAKE_CURRENT_LIST_DIR}/Sources/Devices/SSD1306/SwiftGFX.swift"

@@ -22,7 +22,7 @@ struct ButtonSample {
     RP2040GPIO.configureLed()
 
     let button = Button(
-      configuration: ButtonConfiguration(triggerPin: buttonPin)
+      configuration: Button.Configuration(triggerPin: buttonPin)
     )
 
     while true {
