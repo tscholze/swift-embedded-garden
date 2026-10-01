@@ -184,7 +184,7 @@ detect_pico_mount() {
 
 # Verifies the active ARM toolchain can actually link bare-metal Pico code.
 validate_arm_toolchain() {
-  local gcc_bin gcc_dir lib_dir
+  local gcc_bin gcc_dir lib_dir runtime_library runtime_path
   gcc_bin="$(command -v arm-none-eabi-gcc 2>/dev/null || true)"
 
   if [ -z "${gcc_bin}" ]; then
@@ -192,6 +192,13 @@ validate_arm_toolchain() {
   fi
 
   gcc_dir="$(dirname "${gcc_bin}")"
+  for runtime_library in libc.a libc_nano.a; do
+    runtime_path="$("${gcc_bin}" "-print-file-name=${runtime_library}" 2>/dev/null || true)"
+    if [ -f "${runtime_path}" ]; then
+      return 0
+    fi
+  done
+
   for lib_dir in \
     "${gcc_dir}/../lib" \
     "${gcc_dir}/../lib/arm-none-eabi" \
