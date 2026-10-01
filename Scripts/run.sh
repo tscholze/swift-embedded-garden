@@ -182,6 +182,31 @@ detect_pico_mount() {
   return 1
 }
 
+# Verifies the active ARM toolchain can actually link bare-metal Pico code.
+validate_arm_toolchain() {
+  local gcc_bin gcc_dir lib_dir
+  gcc_bin="$(command -v arm-none-eabi-gcc 2>/dev/null || true)"
+
+  if [ -z "${gcc_bin}" ]; then
+    fail "arm-none-eabi-gcc not found. Run Scripts/init.sh and then source Scripts/env.sh."
+  fi
+
+  gcc_dir="$(dirname "${gcc_bin}")"
+  for lib_dir in \
+    "${gcc_dir}/../lib" \
+    "${gcc_dir}/../lib/arm-none-eabi" \
+    "${gcc_dir}/../../lib" \
+    "${gcc_dir}/../../lib/arm-none-eabi" \
+    "${gcc_dir}/../arm-none-eabi/lib" \
+    "${gcc_dir}/../../arm-none-eabi/lib"; do
+    if [ -f "${lib_dir}/libc.a" ] || [ -f "${lib_dir}/libc_nano.a" ]; then
+      return 0
+    fi
+  done
+
+  fail "The active arm-none-eabi-gcc is incomplete and missing libc/newlib. Run Scripts/init.sh to install the full gcc-arm-embedded toolchain, then source Scripts/env.sh."
+}
+
 # Verifies all required tools and paths are present before building.
 ensure_prerequisites() {
   # Check CMake is installed and available in PATH.
@@ -190,6 +215,8 @@ ensure_prerequisites() {
   command -v ninja >/dev/null 2>&1 || fail "ninja not found. Run Scripts/init.sh."
   # Check Swift compiler is installed and available in PATH.
   command -v swiftc >/dev/null 2>&1 || fail "swiftc not found. Run Scripts/init.sh."
+  # Check the active ARM GCC toolchain is the full, Pico-compatible variant.
+  validate_arm_toolchain
   # Check Pico SDK folder exists.
   [ -d "${PICO_SDK_PATH}" ] || fail "Pico SDK missing at ${PICO_SDK_PATH}. Run Scripts/init.sh."
   # Check elf2uf2 executable exists and can run.

@@ -61,21 +61,143 @@ ensure_brew() {
 # Installs a Homebrew package only when it is not already installed.
 ensure_brew_pkg() {
   local pkg="$1"
+  shift || true
+
   if brew list --versions "$pkg" >/dev/null 2>&1; then
     log "Homebrew package already present: $pkg"
   else
     log "Installing Homebrew package: $pkg"
-    brew install "$pkg"
+    brew install "$pkg" "$@"
   fi
 }
 
+# Checks whether a candidate toolchain contains the core newlib/libc runtime that
+# Pico SDK projects need for bare-metal linking. The Homebrew arm-none-eabi-gcc
+# package is intentionally incomplete on macOS and misses that runtime.
+has_full_arm_toolchain_runtime() {
+  local candidate="$1"
+  local lib_dir
+
+  for lib_dir in \
+    "${candidate}/../lib" \
+    "${candidate}/../lib/arm-none-eabi" \
+    "${candidate}/../../lib" \
+    "${candidate}/../../lib/arm-none-eabi" \
+    "${candidate}/../arm-none-eabi/lib" \
+    "${candidate}/../../arm-none-eabi/lib"; do
+    if [ -f "${lib_dir}/libc.a" ] || [ -f "${lib_dir}/libc_nano.a" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+# Installs the official Arm GNU Embedded package when Homebrew only downloaded it
+# to the cask cache without unpacking it into the expected toolchain directory.
+install_official_arm_toolchain() {
+  local official_pkg install_dir tmp_dir
+
+  official_pkg="$(find /opt/homebrew/Caskroom/gcc-arm-embedded -name 'arm-gnu-toolchain-*.pkg' -print -quit 2>/dev/null || true)"
+  if [ -z "${official_pkg}" ] && [ -d "/usr/local/Caskroom/gcc-arm-embedded" ]; then
+    official_pkg="$(find /usr/local/Caskroom/gcc-arm-embedded -name 'arm-gnu-toolchain-*.pkg' -print -quit 2>/dev/null || true)"
+  fi
+
+  if [ -z "${official_pkg}" ]; then
+    return 1
+  fi
+
+  install_dir="/Applications/ArmGNUToolchain/15.3.rel1/arm-none-eabi"
+  mkdir -p "${install_dir}"
+
+  if [ -x "${install_dir}/bin/arm-none-eabi-gcc" ] && has_full_arm_toolchain_runtime "${install_dir}/bin"; then
+    return 0
+  fi
+
+  tmp_dir="$(mktemp -d)"
+  pkgutil --expand-full "${official_pkg}" "${tmp_dir}"
+
+  if [ -d "${tmp_dir}/Payload/arm-none-eabi" ]; then
+    mkdir -p "${install_dir}/arm-none-eabi"
+    cp -a "${tmp_dir}/Payload/arm-none-eabi/." "${install_dir}/arm-none-eabi/"
+  fi
+  if [ -d "${tmp_dir}/Payload/bin" ]; then
+    mkdir -p "${install_dir}/bin"
+    cp -a "${tmp_dir}/Payload/bin/." "${install_dir}/bin/"
+  fi
+  if [ -d "${tmp_dir}/Payload/lib" ]; then
+    mkdir -p "${install_dir}/lib"
+    cp -a "${tmp_dir}/Payload/lib/." "${install_dir}/lib/"
+  fi
+  if [ -d "${tmp_dir}/Payload/libexec" ]; then
+    mkdir -p "${install_dir}/libexec"
+    cp -a "${tmp_dir}/Payload/libexec/." "${install_dir}/libexec/"
+  fi
+  if [ -d "${tmp_dir}/Payload/share" ]; then
+    mkdir -p "${install_dir}/share"
+    cp -a "${tmp_dir}/Payload/share/." "${install_dir}/share/"
+  fi
+  if [ -d "${tmp_dir}/Payload/include" ]; then
+    mkdir -p "${install_dir}/include"
+    cp -a "${tmp_dir}/Payload/include/." "${install_dir}/include/"
+  fi
+
+  rm -rf "${tmp_dir}"
+  return 0
+}
+
+# Finds the active ARM GNU toolchain binary directory, preferring a full
+# cross-toolchain over the incomplete `arm-none-eabi-gcc` Homebrew package.
+find_arm_toolchain_bin() {
+  local candidate
+  for candidate in \
+    /Applications/ArmGNUToolchain/*/arm-none-eabi/bin \
+    /Applications/ArmGNUToolchain/*/arm-none-eabi/arm-none-eabi/bin \
+    /opt/homebrew/Caskroom/gcc-arm-embedded/*/arm-gnu-toolchain-*/bin \
+    /opt/homebrew/Caskroom/gcc-arm-embedded/*/arm-none-eabi/bin \
+    /usr/local/Caskroom/gcc-arm-embedded/*/arm-gnu-toolchain-*/bin \
+    /usr/local/Caskroom/gcc-arm-embedded/*/arm-none-eabi/bin \
+    /opt/homebrew/opt/gcc-arm-embedded/bin \
+    /usr/local/opt/gcc-arm-embedded/bin \
+    /opt/homebrew/bin \
+    /usr/local/bin; do
+    [ -x "${candidate}/arm-none-eabi-gcc" ] || continue
+    if has_full_arm_toolchain_runtime "${candidate}"; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
 # Ensures ARM cross-compiler tools for RP2040 are available.
+# The Homebrew arm-none-eabi-gcc formula is incomplete on macOS and misses the
+# standard C runtime needed by the Pico linker, so we install the full Arm GNU
+# Embedded toolchain package instead.
 ensure_arm_toolchain() {
-  if command -v arm-none-eabi-gcc >/dev/null 2>&1; then
-    log "ARM GNU toolchain already present: $(command -v arm-none-eabi-gcc)"
+  local toolchain_bin
+  toolchain_bin="$(find_arm_toolchain_bin || true)"
+
+  if [ -n "${toolchain_bin}" ] && [ -x "${toolchain_bin}/arm-none-eabi-gcc" ]; then
+    log "ARM GNU toolchain already present: ${toolchain_bin}/arm-none-eabi-gcc"
     return
   fi
-  ensure_brew_pkg arm-none-eabi-gcc
+
+  if install_official_arm_toolchain; then
+    toolchain_bin="$(find_arm_toolchain_bin || true)"
+    if [ -n "${toolchain_bin}" ] && [ -x "${toolchain_bin}/arm-none-eabi-gcc" ]; then
+      log "ARM GNU toolchain installed: ${toolchain_bin}/arm-none-eabi-gcc"
+      return
+    fi
+  fi
+
+  if brew list --versions gcc-arm-embedded >/dev/null 2>&1; then
+    log "Full ARM GNU embedded toolchain already installed via Homebrew Cask."
+    return
+  fi
+
+  warn "The active ARM GCC is missing libc/newlib. Installing the full gcc-arm-embedded toolchain."
+  ensure_brew_pkg gcc-arm-embedded --cask
 }
 
 # Ensures a Swift 6 compiler is available, provisioning via swiftly if needed.
@@ -168,6 +290,10 @@ install_git_hooks() {
 
 # Writes Scripts/env.sh so build scripts can load generated paths.
 write_env_file() {
+  local swift_bin_dir="${SWIFTLY_BIN_DIR:-${HOME}/.swiftly/bin}"
+  local arm_toolchain_bin
+  arm_toolchain_bin="$(find_arm_toolchain_bin || true)"
+
   cat > "${PROJECT_ROOT}/Scripts/env.sh" <<EOF
 #!/usr/bin/env bash
 # Auto-generated by Scripts/init.sh.
@@ -176,6 +302,15 @@ write_env_file() {
 export PICO_SDK_PATH="${PICO_SDK_PATH}"
 export ELF2UF2_PATH="${TOOLS_DIR}/elf2uf2"
 EOF
+
+  if [ -n "${arm_toolchain_bin}" ]; then
+    printf 'export PATH="%s:${PATH}"\n' "${arm_toolchain_bin}" >> "${PROJECT_ROOT}/Scripts/env.sh"
+  fi
+
+  if [ -d "${swift_bin_dir}" ]; then
+    printf 'export PATH="%s:${PATH}"\n' "${swift_bin_dir}" >> "${PROJECT_ROOT}/Scripts/env.sh"
+  fi
+
   chmod +x "${PROJECT_ROOT}/Scripts/env.sh"
 }
 

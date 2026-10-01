@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Git pre-commit hook: format staged Swift files with swift format.
 #
 # Install via Scripts/init.sh (runs automatically) or manually:
@@ -13,7 +13,10 @@ if ! command -v swift &>/dev/null; then
 fi
 
 # Collect staged .swift files that still exist on disk.
-mapfile -t swift_files < <(
+swift_files=()
+while IFS= read -r file; do
+    swift_files+=("$file")
+done < <(
     git diff --cached --name-only --diff-filter=ACM | grep '\.swift$' || true
 )
 

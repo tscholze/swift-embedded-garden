@@ -77,7 +77,7 @@ The script shows a simple TUI with the most important steps printed.
 - Homebrew
 - USB connection to Raspberry Pi Pico
 
-`Scripts/init.sh` installs/verifies all required host tools (`cmake`, `ninja`, `git`, `arm-none-eabi-gcc`, `swiftly`, `picotool`), provisions Swift 6 via `swiftly`, and pulls `pico-sdk`.
+`Scripts/init.sh` installs/verifies all required host tools (`cmake`, `ninja`, `git`, the full Arm GNU Embedded toolchain, `swiftly`, `picotool`), provisions Swift 6 via `swiftly`, and pulls `pico-sdk`. The project intentionally uses the full `gcc-arm-embedded` toolchain because the slimmer `arm-none-eabi-gcc` Homebrew formula is missing `libc/newlib` needed for Pico SDK linking.
 
 ## Quick start
 
