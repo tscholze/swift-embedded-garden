@@ -76,7 +76,16 @@ ensure_brew_pkg() {
 # package is intentionally incomplete on macOS and misses that runtime.
 has_full_arm_toolchain_runtime() {
   local candidate="$1"
-  local lib_dir
+  local lib_dir runtime_library runtime_path
+
+  if [ -x "${candidate}/arm-none-eabi-gcc" ]; then
+    for runtime_library in libc.a libc_nano.a; do
+      runtime_path="$("${candidate}/arm-none-eabi-gcc" "-print-file-name=${runtime_library}" 2>/dev/null || true)"
+      if [ -f "${runtime_path}" ]; then
+        return 0
+      fi
+    done
+  fi
 
   for lib_dir in \
     "${candidate}/../lib" \
